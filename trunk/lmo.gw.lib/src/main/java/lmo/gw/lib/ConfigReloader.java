@@ -54,7 +54,7 @@ public class ConfigReloader implements ConfigReloaderMBean {
 
     public String reload() throws Exception {
         function.destroy(function.logger);
-        System.setProperty("mn.munkhochir.gw.function", function.name);
+        System.setProperty("lmo.gw.function", function.name);
         Properties p = new Properties();
         File f = new File(System.getProperty("catalina.base") + "/conf/func.properties");
         if (!f.exists()) {
