@@ -96,6 +96,12 @@ public abstract class Function extends HttpServlet {
     }
 
     protected final void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        if (ConfigReloader.isLoading) {
+            try {
+                ConfigReloader.lock.wait(500);
+            } catch (InterruptedException ex) {
+            }
+        }
         String REQID = (String) req.getAttribute(Attribute.REQID);
         Logger logger = Logger.getLogger(this.logger.getName() + "." + REQID);
         Object responseObject = null;
@@ -110,7 +116,6 @@ public abstract class Function extends HttpServlet {
             String requestString = (String) req.getAttribute(Attribute.REQUEST);
             logger.info("request received: " + requestString);
             Object o = null;
-
             Handler handler = null;
             if (req.getMethod().equals("GET")) {
                 handler = this.get();

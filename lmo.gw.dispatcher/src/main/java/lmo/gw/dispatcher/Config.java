@@ -30,6 +30,8 @@ public class Config {
     public static HashMap<String, Set<String>> userperms = new HashMap<String, Set<String>>();
     public static HashMap<String, String> functions = new HashMap<String, String>();
     static BSONSerializer serializer = new BSONSerializer();
+    static final Object lock = new Object();
+    static boolean isLoading = false;
 
     public static Object reload() {
         String name = Config.NAME;
@@ -41,11 +43,17 @@ public class Config {
         Properties properties = new Properties();
         FileInputStream fis = null;
         Config.LOG = name.toUpperCase();
+        Object ret;
         try {
-            fis = new FileInputStream(f);
-            properties.load(fis);
-            PropertyConfigurator.configure(properties);
-            Object ret = Config.init(properties);
+            isLoading = true;
+            synchronized (lock) {
+                fis = new FileInputStream(f);
+                properties.load(fis);
+                PropertyConfigurator.configure(properties);
+                ret = Config.init(properties);
+                isLoading = false;
+                lock.notifyAll();
+            }
             logger.info(ret);
             return ret;
         } catch (IOException ex) {

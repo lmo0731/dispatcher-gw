@@ -27,6 +27,12 @@ public class DispatcherServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (Config.isLoading) {
+            try {
+                Config.lock.wait(500);
+            } catch (InterruptedException ex) {
+            }
+        }
         Long REQID = System.currentTimeMillis() * 1000000 + (long) (Math.random() * 1000000);
         response.setHeader("X-Request-Id", "" + REQID);
         request.setAttribute(Attribute.REQID, "" + REQID);
