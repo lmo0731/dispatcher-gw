@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
  */
 public class FunctionRequest<T> {
 
+    private String requestId;
     private Logger logger;
     private T requestObject;
     private Map<String, String[]> params;
@@ -52,5 +53,13 @@ public class FunctionRequest<T> {
         } catch (Exception ex) {
             throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, String.format("%s type must be %s", name, c.getSimpleName()));
         }
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }
