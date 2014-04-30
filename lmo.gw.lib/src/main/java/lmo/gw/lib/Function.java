@@ -106,9 +106,18 @@ public abstract class Function extends HttpServlet {
         Logger logger = Logger.getLogger(this.logger.getName() + "." + REQID);
         Object responseObject = null;
         boolean xml = false;
+        Handler handler = null;
+        if (req.getMethod().equals("GET")) {
+            handler = this.get();
+        } else if (req.getMethod().equals("POST")) {
+            handler = this.post();
+        } else if (req.getMethod().equals("PUT")) {
+            handler = this.put();
+        } else if (req.getMethod().equals("DELETE")) {
+            handler = this.delete();
+        }
         try {
             if (req.getDispatcherType() != DispatcherType.FORWARD && req.getDispatcherType() != DispatcherType.INCLUDE) {
-                resp.setHeader("Location", "/gw");
                 throw new FunctionException(HttpServletResponse.SC_FORBIDDEN, "not gateway request");
             }
             req.setCharacterEncoding("UTF-8");
@@ -116,16 +125,6 @@ public abstract class Function extends HttpServlet {
             String requestString = (String) req.getAttribute(Attribute.REQUEST);
             logger.info("request received: " + requestString);
             Object o = null;
-            Handler handler = null;
-            if (req.getMethod().equals("GET")) {
-                handler = this.get();
-            } else if (req.getMethod().equals("POST")) {
-                handler = this.post();
-            } else if (req.getMethod().equals("PUT")) {
-                handler = this.put();
-            } else if (req.getMethod().equals("DELETE")) {
-                handler = this.delete();
-            }
             if (handler == null) {
                 throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "method not allowed");
             }
@@ -162,6 +161,7 @@ public abstract class Function extends HttpServlet {
                 throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, "request must not be null");
             }
             FunctionRequest funcReq = handler.getRequest(logger, o, req.getParameterMap());
+            funcReq.setRequestId(REQID);
             FunctionResponse funcRes = new FunctionResponse();
             handler.handle(funcReq, funcRes);
             resp.setStatus(funcRes.getCode());
@@ -191,7 +191,7 @@ public abstract class Function extends HttpServlet {
                 response = "internal error";
             }
         } else {
-            response = new BSONSerializer().serialize(responseObject);
+            response = handler.serializer.serialize(responseObject);
             resp.setContentType("application/json;charset=UTF-8");
         }
         logger.info("response: " + response);
