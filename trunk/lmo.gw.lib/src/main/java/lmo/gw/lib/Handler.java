@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 public abstract class Handler<T> {
 
     final BSONDeserializer<T> deserializer = new BSONDeserializer<T>();
-    final BSONSerializer serialzier = new BSONSerializer();
+    final BSONSerializer serializer = new BSONSerializer();
     T target;
 
     public Handler(T target) {
@@ -29,7 +29,7 @@ public abstract class Handler<T> {
     }
 
     final Handler exclude(String... fields) {
-        serialzier.exclude(fields);
+        serializer.exclude(fields);
         return this;
     }
 
