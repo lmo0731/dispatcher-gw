@@ -8,6 +8,8 @@ import flexjson.JSONException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletConfig;
@@ -107,6 +109,7 @@ public abstract class Function extends HttpServlet {
         Object responseObject = null;
         boolean xml = false;
         Handler handler = null;
+        Map<String, String> resHeaders = null;
         if (req.getMethod().equals("GET")) {
             handler = this.get();
         } else if (req.getMethod().equals("POST")) {
@@ -162,14 +165,15 @@ public abstract class Function extends HttpServlet {
             }
             FunctionRequest funcReq = handler.getRequest(logger, o, req.getParameterMap());
             funcReq.setRequestId(REQID);
-            Enumeration<String> headers = req.getHeaderNames();
-            while (headers.hasMoreElements()) {
-                String header = headers.nextElement();
+            Enumeration<String> reqHeaders = req.getHeaderNames();
+            while (reqHeaders.hasMoreElements()) {
+                String header = reqHeaders.nextElement();
                 funcReq.getHeaders().put(header, req.getHeaders(header));
             }
             FunctionResponse funcRes = new FunctionResponse();
             handler.handle(funcReq, funcRes);
             resp.setStatus(funcRes.getCode());
+            resHeaders = funcRes.getHeaders();
             responseObject = funcRes.getResponseObject();
         } catch (JSONException ex) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -179,11 +183,17 @@ public abstract class Function extends HttpServlet {
                 logger.debug("Function error cause", ex);
             }
             resp.setStatus(ex.getCode());
+            resHeaders = ex.getHeaders();
             responseObject = ex.getMessage();
         } catch (Exception ex) {
             logger.error("Internal error", ex);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             responseObject = "internal error";
+        }
+        if (resHeaders != null) {
+            for (Entry<String, String> e : resHeaders.entrySet()) {
+                resp.setHeader(e.getKey(), e.getValue());
+            }
         }
         String response = null;
         if (xml) {
