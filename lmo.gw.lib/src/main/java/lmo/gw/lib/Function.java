@@ -7,6 +7,7 @@ package lmo.gw.lib;
 import flexjson.JSONException;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Properties;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletConfig;
@@ -20,7 +21,6 @@ import lmo.gw.lib.handler.GetHandler;
 import lmo.gw.lib.handler.PostHandler;
 import lmo.gw.lib.handler.PutHandler;
 import lmo.utils.bson.BSONNotNull;
-import lmo.utils.bson.BSONSerializer;
 import lmo.utils.jaxb.XmlUtil;
 import org.apache.log4j.Logger;
 
@@ -162,6 +162,11 @@ public abstract class Function extends HttpServlet {
             }
             FunctionRequest funcReq = handler.getRequest(logger, o, req.getParameterMap());
             funcReq.setRequestId(REQID);
+            Enumeration<String> headers = req.getHeaderNames();
+            while (headers.hasMoreElements()) {
+                String header = headers.nextElement();
+                funcReq.getHeaders().put(header, req.getHeaders(header));
+            }
             FunctionResponse funcRes = new FunctionResponse();
             handler.handle(funcReq, funcRes);
             resp.setStatus(funcRes.getCode());

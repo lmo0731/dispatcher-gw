@@ -4,6 +4,8 @@
  */
 package lmo.gw.lib;
 
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
@@ -18,6 +20,7 @@ public class FunctionRequest<T> {
     private Logger logger;
     private T requestObject;
     private Map<String, String[]> params;
+    private Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>();
 
     public FunctionRequest(Logger logger, T requestObject, Map<String, String[]> params) {
         this.logger = logger;
@@ -61,5 +64,9 @@ public class FunctionRequest<T> {
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public Map<String, Enumeration<String>> getHeaders() {
+        return headers;
     }
 }
