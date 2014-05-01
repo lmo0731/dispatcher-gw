@@ -4,6 +4,8 @@
  */
 package lmo.gw.lib;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -14,6 +16,7 @@ public class FunctionResponse {
 
     private int code;
     private Object responseObject;
+    private Map<String, String> headers = new HashMap<String, String>();
 
     public FunctionResponse() {
         this.code = HttpServletResponse.SC_OK;
@@ -33,5 +36,9 @@ public class FunctionResponse {
 
     public void setResponseObject(Object responseObject) {
         this.responseObject = responseObject;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 }
