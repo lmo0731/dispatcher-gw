@@ -11,6 +11,7 @@ package lmo.gw.lib;
 public class Attribute {
 
     public static final String REQID = "REQID";
+    public static final String PATHPARAMS = "PATHPARAMS";
     public static final String REQUEST = "REQUEST";
     public static final String RESPONSE = "RESPONSE";
 }

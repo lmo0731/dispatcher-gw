@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import lmo.gw.lib.Node;
 import lmo.utils.bson.BSONSerializer;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -29,6 +30,7 @@ public class Config {
     public static HashMap<String, Set<String>> userips = new HashMap<String, Set<String>>();
     public static HashMap<String, Set<String>> userperms = new HashMap<String, Set<String>>();
     public static HashMap<String, String> functions = new HashMap<String, String>();
+    public static Node functionPaths = new Node();
     static BSONSerializer serializer = new BSONSerializer();
     static final Object lock = new Object();
     static boolean isLoading = false;
@@ -76,7 +78,7 @@ public class Config {
                     if (k.length == 2) {
                         String pass = p.getProperty(s, "");
                         users.put(username, pass);
-                    } else if (k.length == 3 && k[2].equals("roles")) {
+                    } else if (k.length == 3 && k[2].equalsIgnoreCase("roles")) {
                         String perms[] = p.getProperty(s, "").split("[,]");
                         Set<String> permset = new HashSet<String>();
                         for (String r : perms) {
@@ -85,7 +87,7 @@ public class Config {
                             }
                         }
                         userperms.put(username, permset);
-                    } else if (k.length == 3 && k[2].equals("ips")) {
+                    } else if (k.length == 3 && k[2].equalsIgnoreCase("ips")) {
                         String ips[] = p.getProperty(s, "").split("[,]");
                         Set<String> ipset = new HashSet<String>();
                         for (String r : ips) {
@@ -96,16 +98,21 @@ public class Config {
                         userips.put(username, ipset);
                     }
                 }
+                Node.SPLITTER = "/";
                 if (k[0].trim().equalsIgnoreCase("func")) {
-                    k = s.split("[.]", 2);
                     String funcname = k[1].trim();
-                    String path = p.getProperty(s);
-                    functions.put(funcname, path);
+                    if (k.length == 2) {
+                        String path = p.getProperty(s);
+                        functions.put(funcname, path);
+                    } else if (k.length == 3 && k[2].equalsIgnoreCase("pattern")) {
+                        functionPaths.insert(p.getProperty(s), funcname);
+                    }
                 }
             }
         }
         Map<String, Object> config = new HashMap<String, Object>();
         config.put("functions", functions);
+        config.put("functionsPaths", functionPaths.toString(""));
         config.put("users", users.keySet());
         config.put("userperms", userperms);
         config.put("userips", userips);
