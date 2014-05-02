@@ -6,6 +6,7 @@ package lmo.gw.lib;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
@@ -19,13 +20,14 @@ public class FunctionRequest<T> {
     private String requestId;
     private Logger logger;
     private T requestObject;
-    private Map<String, String[]> params;
+    private List<String> pathParams;
+    private Map<String, String[]> queryParams;
     private Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>();
 
     public FunctionRequest(Logger logger, T requestObject, Map<String, String[]> params) {
         this.logger = logger;
         this.requestObject = requestObject;
-        this.params = params;
+        this.queryParams = params;
     }
 
     public T getRequestObject() {
@@ -36,8 +38,16 @@ public class FunctionRequest<T> {
         return logger;
     }
 
-    public Map<String, String[]> getParams() {
-        return params;
+    public Map<String, String[]> getQueryParams() {
+        return queryParams;
+    }
+
+    public List<String> getPathParams() {
+        return pathParams;
+    }
+
+    public void setPathParams(List<String> pathParams) {
+        this.pathParams = pathParams;
     }
 
     public Object getRequestObject(Class c) throws FunctionException {

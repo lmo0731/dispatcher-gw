@@ -17,6 +17,7 @@ import static lmo.gw.dispatcher.Config.userperms;
 import static lmo.gw.dispatcher.Config.users;
 import static lmo.gw.dispatcher.Config.userips;
 import lmo.gw.lib.Attribute;
+import lmo.gw.lib.Node;
 import org.apache.log4j.Logger;
 
 /**
@@ -53,8 +54,13 @@ public class Dispatcher {
         }
         logger.debug("user: " + user);
         String method = request.getMethod();
-        funcname = request.getRequestURI().replaceFirst("/[^/]+/?", "").replace("/", ".");
-        if (!functions.containsKey(funcname)) {
+        String functionPath = request.getRequestURI().replaceFirst("/[^/]+/?", "");
+        Node n = Config.functionPaths.get(functionPath);
+        if (n != null && n.getValue() != null) {
+            funcname = n.getValue();
+            request.setAttribute(Attribute.PATHPARAMS, n.getMatches());
+        }
+        if (funcname == null || !functions.containsKey(funcname)) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             throw new DispatcherException("function not found");
         }

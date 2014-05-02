@@ -6,8 +6,10 @@ package lmo.gw.lib;
 
 import flexjson.JSONException;
 import java.io.IOException;
+import java.lang.String;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -105,6 +107,7 @@ public abstract class Function extends HttpServlet {
             }
         }
         String REQID = (String) req.getAttribute(Attribute.REQID);
+        List<String> PATHPARARMS = (List<String>) req.getAttribute(Attribute.PATHPARAMS);
         Logger logger = Logger.getLogger(this.logger.getName() + "." + REQID);
         Object responseObject = null;
         boolean xml = false;
@@ -158,13 +161,13 @@ public abstract class Function extends HttpServlet {
                         throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
                     }
                 }
-
             }
             if (handler.target != null && handler.target.getClass().isAnnotationPresent(BSONNotNull.class) && o == null) {
                 throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, "request must not be null");
             }
             FunctionRequest funcReq = handler.getRequest(logger, o, req.getParameterMap());
             funcReq.setRequestId(REQID);
+            funcReq.setPathParams(PATHPARARMS);
             Enumeration<String> reqHeaders = req.getHeaderNames();
             while (reqHeaders.hasMoreElements()) {
                 String header = reqHeaders.nextElement();
