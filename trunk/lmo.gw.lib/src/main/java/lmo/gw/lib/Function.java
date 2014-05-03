@@ -7,9 +7,9 @@ package lmo.gw.lib;
 import flexjson.JSONException;
 import java.io.IOException;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -107,7 +107,7 @@ public abstract class Function extends HttpServlet {
             }
         }
         String REQID = (String) req.getAttribute(Attribute.REQID);
-        List<String> PATHPARARMS = (List<String>) req.getAttribute(Attribute.PATHPARAMS);
+        ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
         Logger logger = Logger.getLogger(this.logger.getName() + "." + REQID);
         Object responseObject = null;
         boolean xml = false;

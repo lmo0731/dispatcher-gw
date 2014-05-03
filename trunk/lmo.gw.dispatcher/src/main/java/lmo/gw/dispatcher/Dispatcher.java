@@ -6,7 +6,7 @@ package lmo.gw.dispatcher;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -57,7 +57,7 @@ public class Dispatcher {
         String method = request.getMethod();
         String functionPath = request.getRequestURI().replaceFirst("/[^/]+/", "/");
         logger.debug("path: " + functionPath);
-        LinkedList<String> matches = new LinkedList<String>();
+        ArrayList<String> matches = new ArrayList<String>();
         Node n = Config.functionPaths.get(functionPath, matches);
         if (n != null && n.getValue() != null) {
             funcname = n.getValue();

@@ -4,9 +4,9 @@
  */
 package lmo.gw.lib;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
@@ -20,7 +20,7 @@ public class FunctionRequest<T> {
     private String requestId;
     private Logger logger;
     private T requestObject;
-    private List<String> pathParams;
+    private ArrayList<String> pathParams;
     private Map<String, String[]> queryParams;
     private Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>();
 
@@ -42,11 +42,11 @@ public class FunctionRequest<T> {
         return queryParams;
     }
 
-    public List<String> getPathParams() {
+    public ArrayList<String> getPathParams() {
         return pathParams;
     }
 
-    public void setPathParams(List<String> pathParams) {
+    public void setPathParams(ArrayList<String> pathParams) {
         this.pathParams = pathParams;
     }
 
