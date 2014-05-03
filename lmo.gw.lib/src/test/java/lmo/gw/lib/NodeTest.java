@@ -4,6 +4,7 @@
  */
 package lmo.gw.lib;
 
+import java.util.LinkedList;
 import junit.framework.TestCase;
 
 /**
@@ -18,15 +19,18 @@ public class NodeTest extends TestCase {
 
     public void testSomeMethod() {
         Node root = new Node();
-        root.insert("a.b.c", "d");
-        root.insert("a.b", "e");
-        root.insert("a.b.e", "f");
-        root.insert("a.b.e", "f");
-        root.insert("a.b.e", "f");
-        root.insert("a.b.e", "s");
-        root.insert("c.*.d.*.e.*.*", "s");
+        Node.SPLITTER = "/";
+        root.insert("a/b/c", "d");
+        root.insert("a/b", "e");
+        root.insert("a/b/e", "f");
+        root.insert("a/b/e", "f");
+        root.insert("a/b/e", "f");
+        root.insert("a/b/e", "s");
+        root.insert("c/*/d/*/e/*/*", "s");
+        root.insert("/example/*/url/*/", "Example");
         System.out.println(root.toString());
-        System.out.println(root.get("c.abc.d.1.e.asdadsa.12"));
-        System.out.println(root.getMatches());
+        LinkedList<String> matches = new LinkedList<String>();
+        System.out.println(root.get("example/1/url/2", matches));
+        System.out.println(matches);
     }
 }

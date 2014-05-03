@@ -112,7 +112,7 @@ public class Config {
         }
         Map<String, Object> config = new HashMap<String, Object>();
         config.put("functions", functions);
-        config.put("functionsPaths", functionPaths.toString(""));
+        config.put("functionsPaths", functionPaths.toString("GW"));
         config.put("users", users.keySet());
         config.put("userperms", userperms);
         config.put("userips", userips);

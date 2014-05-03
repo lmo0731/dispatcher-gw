@@ -6,6 +6,7 @@ package lmo.gw.dispatcher;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -54,14 +55,16 @@ public class Dispatcher {
         }
         logger.debug("user: " + user);
         String method = request.getMethod();
-        String functionPath = request.getRequestURI().replaceFirst("/[^/]+/?", "");
-        Node n = Config.functionPaths.get(functionPath);
+        String functionPath = request.getRequestURI().replaceFirst("/[^/]+/", "/");
+        logger.debug("path: " + functionPath);
+        LinkedList<String> matches = new LinkedList<String>();
+        Node n = Config.functionPaths.get(functionPath, matches);
         if (n != null && n.getValue() != null) {
             funcname = n.getValue();
-            request.setAttribute(Attribute.PATHPARAMS, n.getMatches());
+            request.setAttribute(Attribute.PATHPARAMS, matches);
         }
         if (funcname == null || !functions.containsKey(funcname)) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             throw new DispatcherException("function not found");
         }
         if (!pass.equals(users.get(user))) {

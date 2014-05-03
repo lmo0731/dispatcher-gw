@@ -48,6 +48,7 @@ public class DispatcherServlet extends HttpServlet {
             } else {
                 logger.error("Internal error", ex);
                 res = "internal error";
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             PrintWriter out = response.getWriter();
             try {
