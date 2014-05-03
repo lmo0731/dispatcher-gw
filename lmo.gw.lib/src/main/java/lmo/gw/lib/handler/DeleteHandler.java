@@ -10,9 +10,9 @@ import lmo.gw.lib.Handler;
  *
  * @ munkhochir<lmo0731@gmail.com>
  */
-public abstract class DeleteHandler<T> extends Handler<T> {
+public abstract class DeleteHandler extends Handler<Object> {
 
-    public DeleteHandler(T target) {
-        super(target);
+    public DeleteHandler() {
+        super(null);
     }
 }
