@@ -19,14 +19,16 @@ public class Node {
     public static String SPLITTER = ".";
     protected Map<String, Node> childs = new HashMap<String, Node>();
     protected String value = null;
-    protected LinkedList<String> matches = new LinkedList<String>();
 
     public String getValue() {
         return value;
     }
 
-    public Node get(String path) {
-        String[] paths = path.split("[" + SPLITTER + "]", 2);
+    public Node get(String path, List<String> matches) {
+        String[] paths = path
+                .replaceFirst("^[" + SPLITTER + "]+", "")
+                .replaceFirst("[" + SPLITTER + "]+$", "")
+                .split("[" + SPLITTER + "]+", 2);
         Node n = childs.get(paths[0]);
         if (n == null) {
             n = childs.get("*");
@@ -36,18 +38,20 @@ public class Node {
         }
         if (n != null) {
             if (paths.length == 2) {
-                Node k = n.get(paths[1]);
-                matches.addAll(n.matches);
+                Node k = n.get(paths[1], matches);
                 return k;
             } else {
-                return this;
+                return n;
             }
         }
         return null;
     }
 
     public void insert(String path, String value) {
-        String[] paths = path.split("[" + SPLITTER + "]", 2);
+        String[] paths = path
+                .replaceFirst("^[" + SPLITTER + "]+", "")
+                .replaceFirst("[" + SPLITTER + "]+$", "")
+                .split("[" + SPLITTER + "]+", 2);
         Node n = childs.get(paths[0]);
         if (n == null) {
             try {
@@ -87,9 +91,5 @@ public class Node {
     @Override
     public String toString() {
         return this.toString("");
-    }
-
-    public List<String> getMatches() {
-        return matches;
     }
 }
