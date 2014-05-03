@@ -107,8 +107,9 @@ public abstract class Function extends HttpServlet {
             }
         }
         String REQID = (String) req.getAttribute(Attribute.REQID);
+        String funcname = (String) req.getAttribute(Attribute.FUNCNAME);
         ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
-        Logger logger = Logger.getLogger(this.logger.getName() + "." + REQID);
+        Logger logger = Logger.getLogger(funcname + "." + REQID);
         Object responseObject = null;
         boolean xml = false;
         Handler handler = null;
@@ -165,7 +166,7 @@ public abstract class Function extends HttpServlet {
             if (handler.target != null && handler.target.getClass().isAnnotationPresent(BSONNotNull.class) && o == null) {
                 throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, "request must not be null");
             }
-            FunctionRequest funcReq = handler.getRequest(logger, o, req.getParameterMap());
+            FunctionRequest funcReq = handler.getRequest(logger, funcname, o, req.getParameterMap());
             funcReq.setRequestId(REQID);
             funcReq.setPathParams(PATHPARARMS);
             Enumeration<String> reqHeaders = req.getHeaderNames();

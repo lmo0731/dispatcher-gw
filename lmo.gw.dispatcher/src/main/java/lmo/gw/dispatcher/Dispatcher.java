@@ -62,6 +62,7 @@ public class Dispatcher {
         if (n != null && n.getValue() != null) {
             funcname = n.getValue();
             request.setAttribute(Attribute.PATHPARAMS, matches);
+            request.setAttribute(Attribute.FUNCNAME, funcname);
         }
         if (funcname == null || !functions.containsKey(funcname)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

@@ -14,4 +14,5 @@ public class Attribute {
     public static final String PATHPARAMS = "PATHPARAMS";
     public static final String REQUEST = "REQUEST";
     public static final String RESPONSE = "RESPONSE";
+    public static final String FUNCNAME = "FUNCNAME";
 }
