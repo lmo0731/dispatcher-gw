@@ -64,7 +64,7 @@ public class Dispatcher {
             request.setAttribute(Attribute.PATHPARAMS, matches);
         }
         if (funcname == null || !functions.containsKey(funcname)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             throw new DispatcherException("function not found");
         }
         if (!pass.equals(users.get(user))) {
@@ -80,7 +80,7 @@ public class Dispatcher {
         logger.debug("required perm: " + perm);
         Set<String> roles = userperms.get(user);
         if (roles == null || (!roles.contains(perm) && !roles.contains(wildcard))) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             throw new DispatcherException("permission denied");
         }
         return Config.functions.get(funcname);
