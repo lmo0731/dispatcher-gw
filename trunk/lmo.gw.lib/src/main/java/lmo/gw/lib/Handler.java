@@ -33,8 +33,8 @@ public abstract class Handler<T> {
         return this;
     }
 
-    final FunctionRequest<T> getRequest(Logger logger, T target, Map<String, String[]> params) {
-        return new FunctionRequest<T>(logger, target, params);
+    final FunctionRequest<T> getRequest(Logger logger, String functionName, T target, Map<String, String[]> params) {
+        return new FunctionRequest<T>(logger, functionName, target, params);
     }
 
     public abstract void handle(FunctionRequest<T> request, FunctionResponse response) throws FunctionException;

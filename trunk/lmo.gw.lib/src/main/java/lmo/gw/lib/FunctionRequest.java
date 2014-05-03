@@ -23,8 +23,10 @@ public class FunctionRequest<T> {
     private ArrayList<String> pathParams;
     private Map<String, String[]> queryParams;
     private Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>();
+    private String functionName;
 
-    public FunctionRequest(Logger logger, T requestObject, Map<String, String[]> params) {
+    public FunctionRequest(Logger logger, String functionName, T requestObject, Map<String, String[]> params) {
+        this.functionName = functionName;
         this.logger = logger;
         this.requestObject = requestObject;
         this.queryParams = params;
@@ -78,5 +80,9 @@ public class FunctionRequest<T> {
 
     public Map<String, Enumeration<String>> getHeaders() {
         return headers;
+    }
+
+    public String getFunctionName() {
+        return functionName;
     }
 }
