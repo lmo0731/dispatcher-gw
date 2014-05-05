@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lmo.gw.lib.Attribute;
 import lmo.gw.lib.Function;
-import lmo.utils.bson.BSONSerializer;
 import org.apache.log4j.Logger;
 
 /**
@@ -30,9 +29,11 @@ public class DispatcherServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         if (Config.isLoading) {
-            try {
-                Config.lock.wait(500);
-            } catch (InterruptedException ex) {
+            synchronized (Config.lock) {
+                try {
+                    Config.lock.wait();
+                } catch (InterruptedException ex) {
+                }
             }
         }
         String REQID = String.format("%x%03x", System.currentTimeMillis(), (int) (Math.random() * 0xfff));
