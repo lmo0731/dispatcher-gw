@@ -2,8 +2,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>mn.mobicom</groupId>
-    <artifactId>lmo.gw.dispatcher</artifactId>
+    <groupId>lmo</groupId>
+    <artifactId>gw.dispatcher</artifactId>
     <version>1.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
@@ -22,12 +22,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>lmo.utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>lmo.gw.lib</artifactId>
+            <artifactId>gw.lib</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
