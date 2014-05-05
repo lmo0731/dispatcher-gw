@@ -61,7 +61,9 @@ public abstract class Function extends HttpServlet {
                 .replaceAll("^[/]+", "")
                 .replaceAll("[/]+$", "")
                 .replaceAll("[.]+$", "")
-                .replaceAll("^[.]+", "");
+                .replaceAll("^[.]+", "")
+                .replaceAll("[.]+", ".")
+                .replaceAll("[/]+", "/");
         this.name = name;
         this.logger = Logger.getLogger("FUNC." + name.toUpperCase());
         mbean = new ConfigReloader(this);
