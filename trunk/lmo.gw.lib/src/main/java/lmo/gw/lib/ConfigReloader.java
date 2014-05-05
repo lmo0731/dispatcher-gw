@@ -13,6 +13,7 @@ import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.PropertyConfigurator;
 
 /**
@@ -65,10 +66,8 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 function.destroy(function.logger);
                 System.setProperty("lmo.gw.function", function.name);
                 System.setProperty(file, function.name);
+                BasicConfigurator.configure();
                 File f = new File(System.getProperty("catalina.base") + "/conf/" + file + ".properties");
-                if (!f.exists()) {
-                    throw new RuntimeException("configration not found: " + f.getAbsolutePath());
-                }
                 try {
                     p.load(new FileInputStream(f));
                     PropertyConfigurator.configure(p);
