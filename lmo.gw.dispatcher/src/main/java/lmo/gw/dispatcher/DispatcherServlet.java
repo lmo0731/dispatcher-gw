@@ -33,7 +33,7 @@ public class DispatcherServlet extends HttpServlet {
             } catch (InterruptedException ex) {
             }
         }
-        Long REQID = System.currentTimeMillis() * 1000000 + (long) (Math.random() * 1000000);
+        String REQID = String.format("%x%03x", System.currentTimeMillis(), (int) (Math.random() * 0xfff));
         response.setHeader("X-Request-Id", "" + REQID);
         request.setAttribute(Attribute.REQID, "" + REQID);
         Logger logger = Logger.getLogger(LOG + "." + REQID);
