@@ -55,12 +55,13 @@ public class ConfigReloader implements ConfigReloaderMBean {
     }
 
     public String reload() throws Exception {
+        String file = this.function.getClass().getPackage().getName();
         Properties p = new Properties();
         isLoading = true;
         synchronized (lock) {
             function.destroy(function.logger);
             System.setProperty("lmo.gw.function", function.name);
-            File f = new File(System.getProperty("catalina.base") + "/conf/func.properties");
+            File f = new File(System.getProperty("catalina.base") + "/conf/" + file + ".properties");
             if (!f.exists()) {
                 throw new ServletException("configration not found: " + f.getAbsolutePath());
             }
