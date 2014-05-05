@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package lmo.gw.lib;
+package lmo.gw.dispatcher.lib;
 
 import java.util.LinkedList;
 import junit.framework.TestCase;
