@@ -25,6 +25,7 @@ import lmo.gw.lib.handler.GetHandler;
 import lmo.gw.lib.handler.PostHandler;
 import lmo.gw.lib.handler.PutHandler;
 import lmo.utils.bson.BSONNotNull;
+import lmo.utils.bson.BSONSerializer;
 import lmo.utils.jaxb.XmlUtil;
 import org.apache.log4j.Logger;
 
@@ -34,6 +35,9 @@ import org.apache.log4j.Logger;
  */
 public abstract class Function extends HttpServlet {
 
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_XML = "application/xml";
+    public static final String TEXT_PLAIN = "text/plain";
     Logger logger;
     String name = "Function";
     ConfigReloader mbean;
@@ -111,6 +115,7 @@ public abstract class Function extends HttpServlet {
         ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
         Logger logger = Logger.getLogger(funcname + "." + REQID);
         Object responseObject = null;
+        String response;
         boolean xml = false;
         Handler handler = null;
         Map<String, String> resHeaders = null;
@@ -127,21 +132,30 @@ public abstract class Function extends HttpServlet {
             if (req.getDispatcherType() != DispatcherType.FORWARD && req.getDispatcherType() != DispatcherType.INCLUDE) {
                 throw new FunctionException(HttpServletResponse.SC_FORBIDDEN, "not gateway request");
             }
-            req.setCharacterEncoding("UTF-8");
-            resp.setCharacterEncoding("UTF-8");
+            resp.setCharacterEncoding(req.getCharacterEncoding());
             String requestString = (String) req.getAttribute(Attribute.REQUEST);
             logger.info("request received: " + requestString);
             Object o = null;
             if (handler == null) {
                 throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "method not allowed");
             }
+            if (req.getContentType() == null || req.getContentType().isEmpty()) {
+                xml = false;
+                resp.setContentType(APPLICATION_JSON);
+            } else if (req.getContentType().toLowerCase().contains(APPLICATION_XML.toLowerCase())) {
+                xml = true;
+                resp.setContentType(APPLICATION_XML);
+            } else if (req.getContentType().toLowerCase().contains(APPLICATION_JSON.toLowerCase())) {
+                xml = false;
+                resp.setContentType(APPLICATION_JSON);
+            } else {
+                resp.setHeader("Accept", APPLICATION_JSON + ", " + APPLICATION_XML);
+                throw new FunctionException(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable Content-Type");
+            }
             if (requestString.isEmpty()) {
                 o = null;
             } else {
                 logger.info("Content-Type: " + req.getContentType());
-                if (req.getContentType().toLowerCase().contains("application/xml")) {
-                    xml = true;
-                }
                 if (xml) {
                     try {
                         o = XmlUtil.unmarshal(requestString, handler.target.getClass());
@@ -179,42 +193,44 @@ public abstract class Function extends HttpServlet {
             resp.setStatus(funcRes.getCode());
             resHeaders = funcRes.getHeaders();
             responseObject = funcRes.getResponseObject();
+            if (xml) {
+                response = XmlUtil.marshal(responseObject);
+            } else {
+                if (handler != null) {
+                    response = handler.serializer.serialize(responseObject);
+                } else {
+                    response = new BSONSerializer().serialize(responseObject);
+                }
+            }
         } catch (JSONException ex) {
+            resp.setContentType(TEXT_PLAIN);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            responseObject = "Bad request";
+            response = "Bad request";
         } catch (FunctionException ex) {
+            resp.setContentType(TEXT_PLAIN);
             if (ex.getCause() != null) {
                 logger.debug("Function error cause", ex);
             }
             resp.setStatus(ex.getCode());
             resHeaders = ex.getHeaders();
-            responseObject = ex.getMessage();
+            response = ex.getMessage();
         } catch (Exception ex) {
+            resp.setContentType(TEXT_PLAIN);
             logger.error("Internal error", ex);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            responseObject = "internal error";
+            response = "Internal error";
         }
         if (resHeaders != null) {
             for (Entry<String, String> e : resHeaders.entrySet()) {
                 resp.setHeader(e.getKey(), e.getValue());
             }
         }
-        String response = null;
-        if (xml) {
-            try {
-                response = XmlUtil.marshal(responseObject);
-                resp.setContentType("application/xml;charset=UTF-8");
-            } catch (Exception ex) {
-                logger.error("marshaling response", ex);
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response = "internal error";
-            }
-        } else {
-            response = handler.serializer.serialize(responseObject);
-            resp.setContentType("application/json;charset=UTF-8");
+        try {
+            logger.info("response: " + response);
+            resp.getWriter().write(response);
+        } catch (Exception ex) {
+            logger.warn("sending response", ex);
         }
-        logger.info("response: " + response);
-        resp.getWriter().write(response);
         logger.info("DONE: " + resp.getStatus());
     }
 

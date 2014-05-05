@@ -21,24 +21,21 @@ public class XmlValidator {
     public static <T> void validateRequired(T target, Class targetClass)
             throws JAXBException {
         StringBuilder errors = new StringBuilder();
-        Field[] fields = targetClass.getDeclaredFields();
+        Field[] fields = targetClass.getFields();
         for (Field field : fields) {
             XmlElement annotation = field.getAnnotation(XmlElement.class);
             if (annotation != null && annotation.required()) {
                 field.setAccessible(true);
-                if ((field.getModifiers() & Modifier.PUBLIC) > 0
-                        && (field.getModifiers() & Modifier.STATIC) == 0) {
-                    try {
-                        if (field.get(target) == null) {
-                            throw new JAXBException("Required field is missing. '" + field.getName() + "'");
-                        }
-                    } catch (IllegalArgumentException ex) {
-                    } catch (IllegalAccessException ex) {
+                try {
+                    if (field.get(target) == null) {
+                        throw new JAXBException("Required field is missing. '" + field.getName() + "'");
                     }
+                } catch (IllegalArgumentException ex) {
+                } catch (IllegalAccessException ex) {
                 }
             }
         }
-        Method[] methods = targetClass.getDeclaredMethods();
+        Method[] methods = targetClass.getMethods();
         for (Method method : methods) {
             XmlElement annotation = method.getAnnotation(XmlElement.class);
             if (annotation != null && annotation.required()) {
@@ -50,7 +47,6 @@ public class XmlValidator {
                             throw new JAXBException("Required field is missing. '" + name + "'");
                         }
                     } catch (IllegalAccessException ex) {
-                        throw new JAXBException("Can't access to function. '" + method.getName() + "'");
                     } catch (IllegalArgumentException ex) {
                     } catch (InvocationTargetException ex) {
                     }

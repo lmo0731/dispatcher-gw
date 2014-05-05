@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lmo.gw.lib.Attribute;
+import lmo.gw.lib.Function;
 import lmo.utils.bson.BSONSerializer;
 import org.apache.log4j.Logger;
 
@@ -53,7 +54,8 @@ public class DispatcherServlet extends HttpServlet {
             }
             PrintWriter out = response.getWriter();
             try {
-                out.println(new BSONSerializer().serialize(res));
+                response.setContentType(Function.TEXT_PLAIN);
+                out.println(res);
             } finally {
                 out.close();
             }
