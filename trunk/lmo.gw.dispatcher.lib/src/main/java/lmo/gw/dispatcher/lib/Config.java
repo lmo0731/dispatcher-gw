@@ -41,12 +41,15 @@ public class Config {
         try {
             isLoading = true;
             synchronized (lock) {
-                fis = new FileInputStream(f);
-                properties.load(fis);
-                PropertyConfigurator.configure(properties);
-                ret = Config.init(properties, logger);
-                isLoading = false;
-                lock.notifyAll();
+                try {
+                    fis = new FileInputStream(f);
+                    properties.load(fis);
+                    PropertyConfigurator.configure(properties);
+                    ret = Config.init(properties, logger);
+                } finally {
+                    lock.notify();
+                    isLoading = false;
+                }
             }
             logger.info(ret);
             return ret;

@@ -13,7 +13,6 @@ import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.servlet.ServletException;
 import org.apache.log4j.PropertyConfigurator;
 
 /**
@@ -56,29 +55,36 @@ public class ConfigReloader implements ConfigReloaderMBean {
 
     public String reload() throws Exception {
         String file = this.function.getClass().getPackage().getName();
+        if (file.lastIndexOf(".") > 0) {
+            file = file.substring(0, file.lastIndexOf("."));
+        }
         Properties p = new Properties();
         isLoading = true;
         synchronized (lock) {
-            function.destroy(function.logger);
-            System.setProperty("lmo.gw.function", function.name);
-            File f = new File(System.getProperty("catalina.base") + "/conf/" + file + ".properties");
-            if (!f.exists()) {
-                throw new ServletException("configration not found: " + f.getAbsolutePath());
-            }
             try {
-                p.load(new FileInputStream(f));
-                PropertyConfigurator.configure(p);
-            } catch (IOException ex) {
-                throw new ServletException(ex);
+                function.destroy(function.logger);
+                System.setProperty("lmo.gw.function", function.name);
+                System.setProperty(file, function.name);
+                File f = new File(System.getProperty("catalina.base") + "/conf/" + file + ".properties");
+                if (!f.exists()) {
+                    throw new RuntimeException("configration not found: " + f.getAbsolutePath());
+                }
+                try {
+                    p.load(new FileInputStream(f));
+                    PropertyConfigurator.configure(p);
+                } catch (IOException ex) {
+                    function.logger.warn(ex.getMessage());
+                }
+                try {
+                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + function.name + ".properties"));
+                } catch (IOException ex) {
+                    function.logger.warn(ex.getMessage());
+                }
+                function.init(function.logger, p);
+            } finally {
+                lock.notify();
+                isLoading = false;
             }
-            try {
-                p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + function.name + ".properties"));
-            } catch (IOException ex) {
-                function.logger.warn(ex.getMessage());
-            }
-            function.init(function.logger, p);
-            isLoading = false;
-            lock.notify();
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(baos);

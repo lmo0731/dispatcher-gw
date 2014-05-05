@@ -105,9 +105,11 @@ public abstract class Function extends HttpServlet {
 
     protected final void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         if (ConfigReloader.isLoading) {
-            try {
-                ConfigReloader.lock.wait(500);
-            } catch (InterruptedException ex) {
+            synchronized (ConfigReloader.lock) {
+                try {
+                    ConfigReloader.lock.wait();
+                } catch (InterruptedException ex) {
+                }
             }
         }
         String REQID = (String) req.getAttribute(Attribute.REQID);
