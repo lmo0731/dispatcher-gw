@@ -5,6 +5,7 @@
 package lmo.gw.lib;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -52,6 +53,20 @@ public class FunctionException extends RuntimeException implements Serializable 
         super(message, cause);
         this.code = code;
         this.headers = headers;
+    }
+
+    public FunctionException(int code, String errorCode, String message) {
+        super(message);
+        this.code = code;
+        this.headers = new HashMap<String, String>();
+        this.headers.put("X-Error-Code", errorCode);
+    }
+
+    public FunctionException(int code, String errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+        this.headers = new HashMap<String, String>();
+        this.headers.put("X-Error-Code", errorCode);
     }
 
     public int getCode() {
