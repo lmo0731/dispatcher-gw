@@ -146,12 +146,12 @@ public class HttpRequest {
             if (logger != null) {
                 logger.info(this.con.getHeaderField(null));
                 for (String key : this.con.getHeaderFields().keySet()) {
-                    if (key != null && key.startsWith("X-")) {
+                    if (key != null && key.toLowerCase().startsWith("x-")) {
                         logger.info(key + ": " + this.con.getHeaderField(key));
                     }
                 }
             }
-            response.headers = this.con.getHeaderFields();
+            response.headers.putAll(this.con.getHeaderFields());
             response.body = baos.toByteArray();
         } finally {
             this.con.disconnect();
@@ -166,7 +166,8 @@ public class HttpRequest {
         request.setLogger(Logger.getRootLogger());
         HttpResponse response = request.execute();
         System.out.println(response.getStatusLine());
-        System.out.println(response.getFirstHeader("Date"));
+        System.out.println(response.getHeaders().keySet());
+        System.out.println(response.getFirstHeader("content-type"));
         System.out.println(new String(response.getBody(), "UTF-8"));
     }
 }
