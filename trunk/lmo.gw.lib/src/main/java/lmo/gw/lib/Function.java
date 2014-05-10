@@ -213,6 +213,7 @@ public abstract class Function extends HttpServlet {
         } catch (FunctionException ex) {
             resp.setContentType(TEXT_PLAIN);
             if (ex.getCause() != null) {
+                logger.debug("Code: " + ex.code);
                 logger.debug("Function error cause", ex);
             }
             resp.setStatus(ex.getCode());
