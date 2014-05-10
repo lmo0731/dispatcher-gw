@@ -198,7 +198,17 @@ public abstract class Function extends HttpServlet {
             resHeaders = funcRes.getHeaders();
             responseObject = funcRes.getResponseObject();
             if (xml) {
-                response = XmlUtil.marshal(responseObject);
+                if (responseObject != null) {
+                    try {
+                        response = XmlUtil.marshal(responseObject);
+                    } catch (Exception ex) {
+                        logger.warn(o, ex);
+                        resp.setContentType(TEXT_PLAIN);
+                        throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, responseObject.toString());
+                    }
+                } else {
+                    response = "null";
+                }
             } else {
                 if (handler != null) {
                     response = handler.serializer.serialize(responseObject);
