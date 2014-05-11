@@ -56,7 +56,7 @@ public class DefaultConfigReloader extends ConfigReloader {
                 }
                 Node.SPLITTER = "/";
                 if (k[0].trim().equalsIgnoreCase("func")) {
-                    String funcname = k[1].trim();
+                    String funcname = s.split("[.]", 2)[1].trim();
                     if (k.length == 2) {
                         String path = p.getProperty(s);
                         String[] paths = path.split("[!]", 2);
