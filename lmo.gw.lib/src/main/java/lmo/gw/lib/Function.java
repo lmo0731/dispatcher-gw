@@ -143,6 +143,8 @@ public abstract class Function extends HttpServlet {
             if (handler == null) {
                 throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "method not allowed");
             }
+            handler.request = req;
+            handler.response = resp;
             if (req.getContentType() == null || req.getContentType().isEmpty()) {
                 xml = false;
                 resp.setContentType(APPLICATION_JSON);

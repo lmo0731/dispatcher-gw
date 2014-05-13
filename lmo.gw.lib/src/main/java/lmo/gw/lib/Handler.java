@@ -5,6 +5,8 @@
 package lmo.gw.lib;
 
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lmo.utils.bson.BSONDeserializer;
 import lmo.utils.bson.BSONSerializer;
 import org.apache.log4j.Logger;
@@ -17,6 +19,8 @@ public abstract class Handler<T> {
 
     final BSONDeserializer<T> deserializer = new BSONDeserializer<T>();
     final BSONSerializer serializer = new BSONSerializer();
+    HttpServletRequest request;
+    HttpServletResponse response;
     T target;
 
     public Handler(T target) {
@@ -38,4 +42,12 @@ public abstract class Handler<T> {
     }
 
     public abstract void handle(FunctionRequest<T> request, FunctionResponse response) throws FunctionException;
+    
+    protected HttpServletRequest getRequest(){
+        return request;
+    }
+    
+    protected HttpServletResponse getResponse(){
+        return response;
+    }
 }
