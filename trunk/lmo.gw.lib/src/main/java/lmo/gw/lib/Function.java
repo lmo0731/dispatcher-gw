@@ -206,10 +206,11 @@ public abstract class Function extends HttpServlet {
                     } catch (Exception ex) {
                         logger.warn(o, ex);
                         resp.setContentType(TEXT_PLAIN);
-                        throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, responseObject.toString());
+                        throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Unsupported Content-Type, Request processed");
                     }
                 } else {
-                    response = "null";
+                    resp.setContentType(TEXT_PLAIN);
+                    response = "";
                 }
             } else {
                 if (handler != null) {

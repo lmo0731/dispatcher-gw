@@ -52,7 +52,7 @@ public class ExampleServlet extends Function {
                 response.setCode(HttpServletResponse.SC_OK);
                 PostResponse resObj = new PostResponse();
                 resObj.info = "OK info";
-                resObj.map = request.getHeaders();
+                resObj.map = resObj;
                 response.setResponseObject(resObj);
             }
         };
