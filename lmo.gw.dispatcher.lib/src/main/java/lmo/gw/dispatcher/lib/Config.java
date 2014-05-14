@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import lmo.gw.dispatcher.lib.impl.DefaultAuthenticator;
 import lmo.gw.dispatcher.lib.impl.DefaultConfigReloader;
+import lmo.gw.dispatcher.lib.impl.DefaultErrorHandler;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -87,7 +88,7 @@ public class Config {
         try {
             Class errorHandlerClass = Class.forName(
                     p.getProperty("errorHandler",
-                    ErrorHandler.class.getCanonicalName()));
+                    DefaultErrorHandler.class.getCanonicalName()));
             errorHandler = (ErrorHandler) errorHandlerClass.newInstance();
         } catch (Exception ex) {
             logger.warn("errorHandler load", ex);
