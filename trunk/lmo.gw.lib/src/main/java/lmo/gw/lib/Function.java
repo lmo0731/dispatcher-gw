@@ -10,6 +10,7 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -117,6 +118,7 @@ public abstract class Function extends HttpServlet {
         String REQID = (String) req.getAttribute(Attribute.REQID);
         String funcname = (String) req.getAttribute(Attribute.FUNCNAME);
         ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
+        Map<String, Object> ATTRS = new HashMap<String, Object>();
         Logger logger = Logger.getLogger(funcname + "." + REQID);
         Object responseObject = null;
         String response;
@@ -193,6 +195,11 @@ public abstract class Function extends HttpServlet {
             while (reqHeaders.hasMoreElements()) {
                 String header = reqHeaders.nextElement();
                 funcReq.getHeaders().put(header, req.getHeaders(header));
+            }
+            Enumeration<String> reqAttributes = req.getAttributeNames();
+            while (reqAttributes.hasMoreElements()) {
+                String attribute = reqAttributes.nextElement();
+                funcReq.getAttributes().put(attribute, req.getAttribute(attribute));
             }
             FunctionResponse funcRes = new FunctionResponse();
             handler.handle(funcReq, funcRes);

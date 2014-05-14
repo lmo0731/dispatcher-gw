@@ -6,6 +6,7 @@ package lmo.gw.dispatcher.lib.impl;
 
 import lmo.gw.dispatcher.lib.Authenticator;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class DefaultAuthenticator extends Authenticator {
 
-    public String authenticate(HttpServletRequest request, HttpServletResponse response, String funcname, Logger logger) throws ServletException, IOException, DispatcherException {
+    public void authenticate(HttpServletRequest request, HttpServletResponse response, String funcname, Logger logger) throws ServletException, IOException, DispatcherException {
         String authorization = request.getHeader("Authorization");
         response.setHeader("WWW-Authenticate", "Basic realm=\"" + Dispatcher.NAME + "\"");
         if (authorization == null || !authorization.startsWith("Basic ")) {
@@ -58,6 +59,5 @@ public class DefaultAuthenticator extends Authenticator {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             throw new DispatcherException("permission denied");
         }
-        return funcname;
     }
 }
