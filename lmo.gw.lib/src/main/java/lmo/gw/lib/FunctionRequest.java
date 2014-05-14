@@ -22,6 +22,7 @@ public class FunctionRequest<T> {
     private T requestObject;
     private ArrayList<String> pathParams;
     private Map<String, String[]> queryParams;
+    private Map<String, Object> attributes = new HashMap<String, Object>();
     private Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>() {
         @Override
         public Enumeration<String> get(Object key) {
@@ -100,5 +101,9 @@ public class FunctionRequest<T> {
 
     public String getFunctionName() {
         return functionName;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 }
