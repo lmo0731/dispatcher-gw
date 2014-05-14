@@ -23,6 +23,7 @@ public class Config {
     static Logger logger;
     static Authenticator authenticator = null;
     static ConfigReloader configReloader = null;
+    static ErrorHandler errorHandler = null;
     static final Object lock = new Object();
     static boolean isLoading = false;
     static HashMap<String, String> functions = new HashMap<String, String>();
@@ -82,6 +83,16 @@ public class Config {
             logger.warn("configReloader load", ex);
         } finally {
             logger.info("configReloader: " + configReloader);
+        }
+        try {
+            Class errorHandlerClass = Class.forName(
+                    p.getProperty("errorHandler",
+                    ErrorHandler.class.getCanonicalName()));
+            errorHandler = (ErrorHandler) errorHandlerClass.newInstance();
+        } catch (Exception ex) {
+            logger.warn("errorHandler load", ex);
+        } finally {
+            logger.info("errorHandler: " + errorHandler);
         }
         return configReloader.reload(p, logger);
     }

@@ -44,21 +44,11 @@ public class DispatcherServlet extends HttpServlet {
         try {
             Dispatcher d = new Dispatcher("" + REQID, Config.authenticator);
             d.processRequest(request, response);
-        } catch (Exception ex) {
-            String res = null;
-            if (ex instanceof DispatcherException) {
-                res = ex.getMessage();
-            } else {
-                logger.error("Internal error", ex);
-                res = "internal error";
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            }
-            PrintWriter out = response.getWriter();
+        } catch (DispatcherException ex) {
             try {
-                response.setContentType(Function.TEXT_PLAIN);
-                out.println(res);
+                Config.errorHandler.handle(response, logger, ex);
             } finally {
-                out.close();
+                response.getWriter().close();
             }
             logger.info("DONE: " + response.getStatus());
         }
