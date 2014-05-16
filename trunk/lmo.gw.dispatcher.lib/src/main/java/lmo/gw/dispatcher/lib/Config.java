@@ -44,6 +44,10 @@ public class Config {
             isLoading = true;
             synchronized (lock) {
                 try {
+                    Config.destroy();
+                } catch (Exception ex) {
+                }
+                try {
                     fis = new FileInputStream(f);
                     properties.load(fis);
                     PropertyConfigurator.configure(properties);
@@ -78,7 +82,7 @@ public class Config {
         try {
             Class configReloaderClass = Class.forName(
                     p.getProperty("configReloader",
-                    DefaultConfigReloader.class.getCanonicalName()));
+                            DefaultConfigReloader.class.getCanonicalName()));
             configReloader = (ConfigReloader) configReloaderClass.newInstance();
         } catch (Exception ex) {
             logger.warn("configReloader load", ex);
@@ -88,7 +92,7 @@ public class Config {
         try {
             Class errorHandlerClass = Class.forName(
                     p.getProperty("errorHandler",
-                    DefaultErrorHandler.class.getCanonicalName()));
+                            DefaultErrorHandler.class.getCanonicalName()));
             errorHandler = (ErrorHandler) errorHandlerClass.newInstance();
         } catch (Exception ex) {
             logger.warn("errorHandler load", ex);
@@ -96,5 +100,9 @@ public class Config {
             logger.info("errorHandler: " + errorHandler);
         }
         return configReloader.reload(p, logger);
+    }
+
+    public static void destroy() {
+        configReloader.destroy(logger);
     }
 }
