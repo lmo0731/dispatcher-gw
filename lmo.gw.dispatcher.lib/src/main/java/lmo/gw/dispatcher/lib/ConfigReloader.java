@@ -26,4 +26,7 @@ public abstract class ConfigReloader {
     }
 
     public abstract Object reload(Properties p, Logger logger) throws RuntimeException;
+
+    public void destroy(Logger logger) {
+    }
 }

@@ -24,6 +24,7 @@ public class ConfigReloaderServlet extends Function {
 
     @Override
     protected void init(Logger logger, Properties p) throws ServletException {
+        Config.reload(logger);
     }
 
     @Override
