@@ -43,6 +43,8 @@ public class Config {
         try {
             isLoading = true;
             synchronized (lock) {
+                Config.functionPaths = new Node();
+                Config.functions.clear();
                 try {
                     Config.destroy();
                 } catch (Exception ex) {
