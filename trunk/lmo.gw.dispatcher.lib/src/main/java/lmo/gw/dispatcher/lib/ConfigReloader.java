@@ -26,11 +26,15 @@ public abstract class ConfigReloader {
     public String getFunctions() {
         return Config.functionPaths.toString(Dispatcher.NAME);
     }
-    
+
     public Map<String, String> getFunctionsMap() {
         Map<String, String> map = new HashMap<String, String>();
         Config.functionPaths.toMap(Dispatcher.NAME, map);
         return map;
+    }
+
+    public Map<String, String> getFunctionConfig() {
+        return Config.functions;
     }
 
     public abstract Object reload(Properties p, Logger logger) throws RuntimeException;
