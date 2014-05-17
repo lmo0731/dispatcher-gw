@@ -20,7 +20,7 @@ public class DefaultErrorHandler extends ErrorHandler {
 
     @Override
     public void handle(HttpServletResponse response, Logger logger, DispatcherException ex) throws IOException {
-        String res = ex.getMessage();;
+        String res = ex.getMessage();
         PrintWriter out = response.getWriter();
         try {
             response.setContentType(Function.TEXT_PLAIN);
