@@ -4,6 +4,8 @@
  */
 package lmo.gw.dispatcher.lib;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
@@ -22,7 +24,13 @@ public abstract class ConfigReloader {
     }
 
     public String getFunctions() {
-        return Config.functionPaths.toString("GW");
+        return Config.functionPaths.toString(Dispatcher.NAME);
+    }
+    
+    public Map<String, String> getFunctionsMap() {
+        Map<String, String> map = new HashMap<String, String>();
+        Config.functionPaths.toMap(Dispatcher.NAME, map);
+        return map;
     }
 
     public abstract Object reload(Properties p, Logger logger) throws RuntimeException;
