@@ -22,6 +22,7 @@ public class NodeTest extends TestCase {
     public void testSomeMethod() {
         Node root = new Node();
         Node.SPLITTER = "/";
+        root.insert("/", "k");
         root.insert("a/b/c", "d");
         root.insert("a/b", "e");
         root.insert("a/b/e", "f");

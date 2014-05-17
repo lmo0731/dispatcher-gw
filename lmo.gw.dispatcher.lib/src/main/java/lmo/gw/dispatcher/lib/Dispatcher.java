@@ -32,7 +32,7 @@ public class Dispatcher {
     }
 
     protected String getFunction(HttpServletRequest request, HttpServletResponse response) throws DispatcherException {
-        String functionPath = request.getRequestURI().replaceFirst("/[^/]+/", "/");
+        String functionPath = request.getRequestURI().replaceFirst("/?" + Dispatcher.NAME + "/?", "/");
         logger.debug("path: " + functionPath);
         ArrayList<String> matches = new ArrayList<String>();
         String funcname = null;

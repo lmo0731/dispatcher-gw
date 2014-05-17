@@ -28,16 +28,16 @@ public class Node {
                 .replaceFirst("^[" + SPLITTER + "]+", "")
                 .replaceFirst("[" + SPLITTER + "]+$", "")
                 .split("[" + SPLITTER + "]+", 2);
-        Node n = childs.get(paths[0]);
+        Node n = childs.get(paths[0].trim());
         if (n == null) {
             n = childs.get("*");
             if (n != null) {
-                matches.add(paths[0]);
+                matches.add(paths[0].trim());
             }
         }
         if (n != null) {
             if (paths.length == 2) {
-                Node k = n.get(paths[1], matches);
+                Node k = n.get(paths[1].trim(), matches);
                 return k;
             } else {
                 return n;
@@ -58,10 +58,10 @@ public class Node {
             } catch (Exception ex) {
                 n = new Node();
             }
-            childs.put(paths[0], n);
+            childs.put(paths[0].trim(), n);
         }
         if (paths.length == 2 && !paths[1].trim().isEmpty()) {
-            n.insert(paths[1], value);
+            n.insert(paths[1].trim(), value);
         } else {
             n.value = value;
         }
