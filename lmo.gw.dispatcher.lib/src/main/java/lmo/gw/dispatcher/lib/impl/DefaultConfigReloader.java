@@ -70,7 +70,7 @@ public class DefaultConfigReloader extends ConfigReloader {
             }
         }
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put("functions", getFunctions());
+        config.put("functions", getFunctionsMap());
         config.put("users", users.keySet());
         config.put("userperms", userperms);
         config.put("userips", userips);
