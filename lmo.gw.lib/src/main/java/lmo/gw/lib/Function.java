@@ -158,7 +158,7 @@ public abstract class Function extends HttpServlet {
                 resp.setContentType(APPLICATION_JSON);
             } else {
                 resp.setHeader("Accept", APPLICATION_JSON + ", " + APPLICATION_XML);
-                throw new FunctionException(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable Content-Type");
+                throw new FunctionException(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable Content-Type: " + req.getContentType());
             }
             if (requestString.isEmpty()) {
                 o = null;
@@ -213,7 +213,7 @@ public abstract class Function extends HttpServlet {
                     } catch (Exception ex) {
                         logger.warn(o, ex);
                         resp.setContentType(TEXT_PLAIN);
-                        throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Unsupported Content-Type, Request processed");
+                        throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Unsupported Content-Type: " + req.getContentType() + ", Request processed");
                     }
                 } else {
                     resp.setContentType(TEXT_PLAIN);
