@@ -91,4 +91,19 @@ public class Node {
     public String toString() {
         return this.toString("");
     }
+
+    public void toMap(String prefix, Map<String, String> map) {
+        prefix = prefix.trim();
+        if (value != null) {
+            map.put(prefix, value);
+        }
+        if (prefix != null && !prefix.isEmpty()) {
+            prefix = prefix + SPLITTER;
+        } else {
+            prefix = "";
+        }
+        for (Entry<String, Node> n : childs.entrySet()) {
+            n.getValue().toMap(prefix + n.getKey(), map);
+        }
+    }
 }

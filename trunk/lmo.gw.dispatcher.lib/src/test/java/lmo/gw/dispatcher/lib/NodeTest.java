@@ -4,7 +4,9 @@
  */
 package lmo.gw.dispatcher.lib;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import junit.framework.TestCase;
 
 /**
@@ -32,5 +34,8 @@ public class NodeTest extends TestCase {
         LinkedList<String> matches = new LinkedList<String>();
         System.out.println(root.get("example/1/url/2", matches));
         System.out.println(matches);
+        Map<String, String> map = new HashMap<String, String>();
+        root.toMap("resource", map);
+        System.out.println(map);
     }
 }
