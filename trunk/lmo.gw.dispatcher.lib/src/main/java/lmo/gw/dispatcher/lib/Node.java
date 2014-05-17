@@ -15,7 +15,7 @@ import java.util.Map.Entry;
  */
 public class Node {
 
-    public static String SPLITTER = ".";
+    public static String SPLITTER = "/";
     protected Map<String, Node> childs = new HashMap<String, Node>();
     protected String value = null;
 
