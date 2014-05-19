@@ -4,6 +4,8 @@
  */
 package lmo.gw.lib;
 
+import flexjson.ObjectFactory;
+import flexjson.ObjectFactory;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,12 +29,17 @@ public abstract class Handler<T> {
         this.target = target;
     }
 
-    final Handler use(String path, Class c) {
+    public final Handler use(String path, Class c) {
         deserializer.use(path, c);
         return this;
     }
 
-    final Handler exclude(String... fields) {
+    public final Handler use(Class c, ObjectFactory o) {
+        deserializer.use(c, o);
+        return this;
+    }
+
+    public final Handler exclude(String... fields) {
         serializer.exclude(fields);
         return this;
     }
@@ -42,12 +49,12 @@ public abstract class Handler<T> {
     }
 
     public abstract void handle(FunctionRequest<T> request, FunctionResponse response) throws FunctionException;
-    
-    protected HttpServletRequest getRequest(){
+
+    protected HttpServletRequest getRequest() {
         return request;
     }
-    
-    protected HttpServletResponse getResponse(){
+
+    protected HttpServletResponse getResponse() {
         return response;
     }
 }
