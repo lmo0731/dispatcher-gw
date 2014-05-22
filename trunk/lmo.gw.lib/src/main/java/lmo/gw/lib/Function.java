@@ -168,6 +168,7 @@ public abstract class Function extends HttpServlet {
                     try {
                         o = XmlUtil.unmarshal(requestString, handler.target.getClass());
                     } catch (Exception ex) {
+                        logger.warn("XML unmarhsalling", ex);
                         throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
                     }
                 } else {
@@ -181,6 +182,7 @@ public abstract class Function extends HttpServlet {
                             o = handler.deserializer.deserialize(requestString);
                         }
                     } catch (Exception ex) {
+                        logger.warn("JSON unmarhsalling", ex);
                         throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
                     }
                 }
