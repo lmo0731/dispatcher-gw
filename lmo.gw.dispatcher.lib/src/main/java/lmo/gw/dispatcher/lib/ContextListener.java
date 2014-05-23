@@ -4,9 +4,10 @@
  */
 package lmo.gw.dispatcher.lib;
 
+import java.util.Properties;
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import lmo.gw.lib.FunctionContextListener;
 import org.apache.log4j.Logger;
 
 /**
@@ -15,19 +16,13 @@ import org.apache.log4j.Logger;
  * @ munkhochir<lmo0731@gmail.com>
  */
 @WebListener()
-public class ContextListener implements ServletContextListener {
+public class ContextListener extends FunctionContextListener {
 
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        Dispatcher.NAME = sce.getServletContext().getContextPath()
-                .replaceAll("^[/]+", "")
-                .replaceAll("[/]+$", "");
-        Logger logger = Logger.getLogger(Dispatcher.NAME + ".CONFIG");
+    public void init(Properties p) throws Exception {
+        Dispatcher.NAME = getName();
         Config.reload(logger);
     }
 
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-        Config.destroy();
+    public void destroy() throws Exception {
     }
 }

@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
  *
  * @ munkhochir<lmo0731@gmail.com>
  */
-public abstract class Function extends HttpServlet {
+public abstract class Function extends HttpServlet implements ConfigListener {
 
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_XML = "application/xml";
@@ -42,6 +42,10 @@ public abstract class Function extends HttpServlet {
     Logger logger;
     String name = "Function";
     ConfigReloader mbean;
+
+    public String getName() {
+        return name;
+    }
 
     @Override
     public final void init(ServletConfig config) throws ServletException {
@@ -84,6 +88,10 @@ public abstract class Function extends HttpServlet {
         super.destroy(); //To change body of generated methods, choose Tools | Templates.
         destroy(logger);
         mbean.unregister();
+    }
+
+    public void init(Properties p) throws Exception {
+        this.init(logger, p);
     }
 
     protected abstract void init(Logger logger, Properties p) throws ServletException;
