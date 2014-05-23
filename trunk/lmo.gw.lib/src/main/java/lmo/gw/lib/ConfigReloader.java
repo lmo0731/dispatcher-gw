@@ -14,6 +14,7 @@ import java.util.Properties;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 /**
@@ -22,14 +23,16 @@ import org.apache.log4j.PropertyConfigurator;
  */
 public class ConfigReloader implements ConfigReloaderMBean {
 
-    Function function;
+    ConfigListener listener;
     String name;
     static boolean isLoading = false;
     static final Object lock = new Object();
+    Logger logger;
 
-    public ConfigReloader(Function function) {
-        this.function = function;
-        this.name = "lmo.gw.function." + function.name + ":type=Config,mbean=ConfigReloader";
+    public ConfigReloader(ConfigListener listener) {
+        this.listener = listener;
+        this.name = "lmo.gw.function." + this.listener.getName() + ":type=Config,mbean=ConfigReloader";
+        this.logger = Logger.getLogger("FUNC." + name + ".CONFIG");
     }
 
     public String unregister() {
@@ -38,7 +41,6 @@ public class ConfigReloader implements ConfigReloaderMBean {
             ObjectName mbname = new ObjectName(name);
             mbs.unregisterMBean(mbname);
         } catch (Exception ex) {
-            function.logger.warn("unregistering mbean", ex);
         }
         return "OK";
     }
@@ -49,37 +51,40 @@ public class ConfigReloader implements ConfigReloaderMBean {
             ObjectName mbname = new ObjectName(name);
             mbs.registerMBean(this, mbname);
         } catch (Exception ex) {
-            function.logger.warn("registering mbean", ex);
         }
         return "OK";
     }
 
     public String reload() throws Exception {
-        String file = this.function.getClass().getPackage().getName();
-        if (file.lastIndexOf(".") > 0) {
-            file = file.substring(0, file.lastIndexOf("."));
-        }
         Properties p = new Properties();
         isLoading = true;
         synchronized (lock) {
             try {
-                function.destroy(function.logger);
-                System.setProperty("lmo.gw.function", function.name);
-                System.setProperty(file, function.name);
+                try {
+                    listener.destroy();
+                } catch (Exception ex) {
+                    logger.warn("", ex);
+                }
+                System.setProperty("lmo.gw.function", listener.getName());
                 BasicConfigurator.configure();
-                File f = new File(System.getProperty("catalina.base") + "/conf/lmo.func.properties");
                 try {
-                    p.load(new FileInputStream(f));
-                    PropertyConfigurator.configure(p);
+                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/lmo.func.properties"));
                 } catch (IOException ex) {
-                    function.logger.warn(ex.getMessage());
+                    logger.warn(ex.getMessage());
                 }
                 try {
-                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + function.name + ".properties"));
+                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + listener.getName() + ".properties"));
                 } catch (IOException ex) {
-                    function.logger.warn(ex.getMessage());
+                    logger.warn(ex.getMessage());
                 }
-                function.init(function.logger, p);
+                PropertyConfigurator.configure(p);
+                try {
+                    listener.init(p);
+                } catch (Exception ex) {
+                    logger.warn("", ex);
+                }
+            } catch (Exception ex) {
+                logger.warn("", ex);
             } finally {
                 lock.notify();
                 isLoading = false;
@@ -87,9 +92,13 @@ public class ConfigReloader implements ConfigReloaderMBean {
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(baos);
+
         p.list(writer);
+
         writer.flush();
-        return baos.toString("UTF-8");
+
+        return baos.toString(
+                "UTF-8");
 
     }
 }
