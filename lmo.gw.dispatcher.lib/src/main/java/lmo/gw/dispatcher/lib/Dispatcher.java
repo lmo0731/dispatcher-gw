@@ -68,13 +68,13 @@ public class Dispatcher {
         if (cxt == null) {
             logger.error("context not found: /" + contextName);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw new DispatcherException("internal error");
+            throw new DispatcherException("function not found");
         }
         RequestDispatcher dispatcher = cxt.getRequestDispatcher("/" + servletPath);
         if (dispatcher == null) {
             logger.error("path not found: /" + servletPath);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw new DispatcherException("internal error");
+            throw new DispatcherException("function not found");
         }
         logger.info("Dispatching request to /" + contextName + "/" + servletPath);
         try {
