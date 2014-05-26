@@ -26,7 +26,7 @@ public class BSONNumberFactory implements ObjectFactory {
             if (jsonnumber.isDecimal()) {
                 number = jsonnumber.doubleValue();
             } else {
-                number = jsonnumber.intValue();
+                number = jsonnumber.longValue();
             }
             if (targetType == Integer.class) {
                 return number.intValue();
