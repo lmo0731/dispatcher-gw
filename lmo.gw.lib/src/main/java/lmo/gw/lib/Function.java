@@ -94,6 +94,12 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         this.init(logger, p);
     }
 
+    protected void begin(Map<String, Object> params, HttpServletRequest request, String raw, Logger logger) {
+    }
+
+    protected void end(Map<String, Object> params, HttpServletResponse response, String raw, Logger logger) {
+    }
+
     protected abstract void init(Logger logger, Properties p) throws ServletException;
 
     protected abstract void destroy(Logger logger);
@@ -125,11 +131,17 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         }
         String REQID = (String) req.getAttribute(Attribute.REQID);
         String funcname = (String) req.getAttribute(Attribute.FUNCNAME);
+        String request = (String) req.getAttribute(Attribute.REQUEST);
+        String response = null;
         ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
         Map<String, Object> ATTRS = new HashMap<String, Object>();
+        Enumeration<String> reqAttributes = req.getAttributeNames();
+        while (reqAttributes.hasMoreElements()) {
+            String attribute = reqAttributes.nextElement();
+            ATTRS.put(attribute, req.getAttribute(attribute));
+        }
         Logger logger = Logger.getLogger(funcname + "." + REQID);
         Object responseObject = null;
-        String response;
         boolean xml = false;
         Handler handler = null;
         Map<String, String> resHeaders = null;
@@ -143,12 +155,12 @@ public abstract class Function extends HttpServlet implements ConfigListener {
             handler = this.delete();
         }
         try {
+            begin(ATTRS, req, request, logger);
             if (req.getDispatcherType() != DispatcherType.FORWARD && req.getDispatcherType() != DispatcherType.INCLUDE) {
                 throw new FunctionException(HttpServletResponse.SC_FORBIDDEN, "not gateway request");
             }
             resp.setCharacterEncoding(req.getCharacterEncoding());
-            String requestString = (String) req.getAttribute(Attribute.REQUEST);
-            logger.info("request received: " + requestString);
+            logger.info("request received: " + request);
             Object o = null;
             if (handler == null) {
                 throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "method not allowed");
@@ -168,13 +180,14 @@ public abstract class Function extends HttpServlet implements ConfigListener {
                 resp.setHeader("Accept", APPLICATION_JSON + ", " + APPLICATION_XML);
                 throw new FunctionException(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable Content-Type: " + req.getContentType());
             }
-            if (requestString.isEmpty()) {
+
+            if (request.isEmpty()) {
                 o = null;
             } else {
                 logger.info("Content-Type: " + req.getContentType());
                 if (xml) {
                     try {
-                        o = XmlUtil.unmarshal(requestString, handler.target.getClass());
+                        o = XmlUtil.unmarshal(request, handler.target.getClass());
                     } catch (Exception ex) {
                         logger.warn("XML unmarhsalling", ex);
                         throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
@@ -185,9 +198,9 @@ public abstract class Function extends HttpServlet implements ConfigListener {
                             handler.deserializer.use("values", handler.target.getClass().getComponentType());
                         }
                         if (handler.target != null && handler.target.getClass() != Object.class) {
-                            o = handler.deserializer.deserializeInto(requestString, handler.target);
+                            o = handler.deserializer.deserializeInto(request, handler.target);
                         } else {
-                            o = handler.deserializer.deserialize(requestString);
+                            o = handler.deserializer.deserialize(request);
                         }
                     } catch (Exception ex) {
                         logger.warn("JSON unmarhsalling", ex);
@@ -201,15 +214,11 @@ public abstract class Function extends HttpServlet implements ConfigListener {
             FunctionRequest funcReq = handler.getRequest(logger, funcname, o, req.getParameterMap());
             funcReq.setRequestId(REQID);
             funcReq.setPathParams(PATHPARARMS);
+            funcReq.getAttributes().putAll(ATTRS);
             Enumeration<String> reqHeaders = req.getHeaderNames();
             while (reqHeaders.hasMoreElements()) {
                 String header = reqHeaders.nextElement();
                 funcReq.getHeaders().put(header, req.getHeaders(header));
-            }
-            Enumeration<String> reqAttributes = req.getAttributeNames();
-            while (reqAttributes.hasMoreElements()) {
-                String attribute = reqAttributes.nextElement();
-                funcReq.getAttributes().put(attribute, req.getAttribute(attribute));
             }
             FunctionResponse funcRes = new FunctionResponse();
             handler.handle(funcReq, funcRes);
@@ -254,6 +263,8 @@ public abstract class Function extends HttpServlet implements ConfigListener {
             logger.error("Internal error", ex);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response = "Internal error";
+        } finally {
+            end(ATTRS, resp, response, logger);
         }
         if (resHeaders != null) {
             for (Entry<String, String> e : resHeaders.entrySet()) {
