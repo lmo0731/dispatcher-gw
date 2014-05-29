@@ -160,6 +160,8 @@ public abstract class Function extends HttpServlet implements ConfigListener {
                 throw new FunctionException(HttpServletResponse.SC_FORBIDDEN, "not gateway request");
             }
             resp.setCharacterEncoding(req.getCharacterEncoding());
+            logger.info("request method: " + req.getMethod());
+            logger.info("request query: " + req.getQueryString());
             logger.info("request received: " + request);
             Object o = null;
             if (handler == null) {
