@@ -47,7 +47,7 @@ public class BSONNumberFactory implements ObjectFactory {
                 return number.byteValue();
             }
             if (targetType == String.class) {
-                return number.toString();
+                return "" + number.doubleValue();
             }
             return number.doubleValue();
         }
