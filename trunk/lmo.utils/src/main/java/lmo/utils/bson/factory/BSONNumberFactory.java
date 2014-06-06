@@ -46,6 +46,9 @@ public class BSONNumberFactory implements ObjectFactory {
             if (targetType == Byte.class) {
                 return number.byteValue();
             }
+            if (targetType == String.class) {
+                return number.toString();
+            }
             return number.doubleValue();
         }
         throw new JSONException(context.getCurrentPath().toString() + " is not number object");
