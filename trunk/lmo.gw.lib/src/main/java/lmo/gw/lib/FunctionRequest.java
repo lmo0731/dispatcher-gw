@@ -21,23 +21,7 @@ public class FunctionRequest<T> {
     private Logger logger;
     private T requestObject;
     private ArrayList<String> pathParams;
-    private final Map<String, String[]> queryParams = new HashMap<String, String[]>() {
-        @Override
-        public String[] get(Object key) {
-            if (key != null && key instanceof String) {
-                key = key.toString().toLowerCase();
-            }
-            return super.get(key); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public String[] put(String key, String[] value) {
-            if (key != null) {
-                key = key.toLowerCase();
-            }
-            return super.put(key, value); //To change body of generated methods, choose Tools | Templates.
-        }
-    };
+    private final Map<String, String[]> queryParams = new HashMap<String, String[]>();
     private final Map<String, Object> attributes = new HashMap<String, Object>();
     private final Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>() {
         @Override
@@ -45,7 +29,7 @@ public class FunctionRequest<T> {
             if (key != null && key instanceof String) {
                 key = key.toString().toLowerCase();
             }
-            return super.get(key); //To change body of generated methods, choose Tools | Templates.
+            return super.get(key);
         }
 
         @Override
@@ -53,7 +37,7 @@ public class FunctionRequest<T> {
             if (key != null) {
                 key = key.toLowerCase();
             }
-            return super.put(key, value); //To change body of generated methods, choose Tools | Templates.
+            return super.put(key, value);
         }
     };
     private String functionName;
