@@ -62,7 +62,7 @@ public class FunctionRequest<T> {
         this.functionName = functionName;
         this.logger = logger;
         this.requestObject = requestObject;
-        this.queryParams = params;
+        this.queryParams.putAll(params);
     }
 
     public T getRequestObject() {
