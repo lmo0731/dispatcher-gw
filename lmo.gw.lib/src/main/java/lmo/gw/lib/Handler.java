@@ -26,14 +26,6 @@ public abstract class Handler<T> {
     HttpServletResponse response;
     T target;
 
-    public Handler(Class<? extends T> c) {
-        try {
-            this.target = c.newInstance();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
     public Handler(T target) {
         this.target = target;
     }
