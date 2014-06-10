@@ -138,49 +138,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         String response = null;
         ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
         Map<String, Object> ATTRS = new HashMap<String, Object>();
-        Map<String, String[]> QUERY = new HashMap<String, String[]>() {
-            @Override
-            public String[] put(String key, String[] value) {
-                return super.put(key.toLowerCase(), value); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public String[] get(Object key) {
-                if (key instanceof String) {
-                    key = ((String) key).toLowerCase();
-                }
-                return super.get(key); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public boolean containsKey(Object key) {
-                if (key instanceof String) {
-                    key = ((String) key).toLowerCase();
-                }
-                return super.containsKey(key); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public String[] remove(Object key) {
-                if (key instanceof String) {
-                    key = ((String) key).toLowerCase();
-                }
-                return super.remove(key); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
-        for (String key : req.getParameterMap().keySet()) {
-            key = key.toLowerCase();
-            String[] values2 = QUERY.get(key);
-            if (QUERY.containsKey(key)) {
-                String[] values1 = QUERY.get(key);
-                String[] merge = new String[values1.length + values2.length];
-                System.arraycopy(values1, 0, merge, 0, values1.length);
-                System.arraycopy(values2, 0, merge, values1.length, values2.length);
-                QUERY.put(key, merge);
-            } else {
-                QUERY.put(key, values2);
-            }
-        }
+        Map<String, String[]> QUERY = new HashMap<String, String[]>(req.getParameterMap());
         Enumeration<String> reqAttributes = req.getAttributeNames();
         while (reqAttributes.hasMoreElements()) {
             String attribute = reqAttributes.nextElement();
