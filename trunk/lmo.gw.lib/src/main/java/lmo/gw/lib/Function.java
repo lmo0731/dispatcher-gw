@@ -6,11 +6,13 @@ package lmo.gw.lib;
 
 import flexjson.JSONException;
 import java.io.IOException;
-import java.lang.String;
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -136,6 +138,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         String response = null;
         ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
         Map<String, Object> ATTRS = new HashMap<String, Object>();
+        Map<String, String[]> QUERY = new HashMap<String, String[]>(req.getParameterMap());
         Enumeration<String> reqAttributes = req.getAttributeNames();
         while (reqAttributes.hasMoreElements()) {
             String attribute = reqAttributes.nextElement();
@@ -180,6 +183,37 @@ public abstract class Function extends HttpServlet implements ConfigListener {
                 xml = false;
                 resp.setContentType(APPLICATION_JSON);
             } else if (req.getContentType().toLowerCase().contains(X_WWW_FORM_URLENCODED.toLowerCase())) {
+                if (request != null) {
+                    String[] pairs = request.split("&");
+                    Map<String, List<String>> queryMap = new HashMap<String, List<String>>();
+                    for (String pair : pairs) {
+                        String[] kv = pair.split("=", 2);
+                        if (kv.length == 2) {
+                            try {
+                                String key = URLDecoder.decode(kv[0], "UTF-8");
+                                String value = URLDecoder.decode(kv[1], "UTF-8");
+                                if (queryMap.containsKey(key)) {
+                                    queryMap.get(key).add(value);
+                                } else {
+                                    queryMap.put(key, new ArrayList<String>(Arrays.asList(new String[]{value})));
+                                }
+                            } catch (Exception ex) {
+                            }
+                        }
+                    }
+                    for (String key : queryMap.keySet()) {
+                        String[] values2 = queryMap.get(key).toArray(new String[]{});
+                        if (QUERY.containsKey(key)) {
+                            String[] values1 = QUERY.get(key);
+                            String[] merge = new String[values1.length + values2.length];
+                            System.arraycopy(values1, 0, merge, 0, values1.length);
+                            System.arraycopy(values2, 0, merge, values1.length, values2.length);
+                            QUERY.put(key, merge);
+                        } else {
+                            QUERY.put(key, values2);
+                        }
+                    }
+                }
                 xml = false;
                 resp.setContentType(APPLICATION_JSON);
             } else {
@@ -217,7 +251,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
             if (handler.target != null && handler.target.getClass().isAnnotationPresent(BSONNotNull.class) && o == null) {
                 throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, "request must not be null");
             }
-            FunctionRequest funcReq = handler.getRequest(logger, funcname, o, req.getParameterMap());
+            FunctionRequest funcReq = handler.getRequest(logger, funcname, o, QUERY);
             funcReq.setRequestId(REQID);
             funcReq.setPathParams(PATHPARARMS);
             funcReq.getAttributes().putAll(ATTRS);
