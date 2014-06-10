@@ -30,6 +30,12 @@ public class Node {
                 .split("[" + SPLITTER + "]+", 2);
         Node n = childs.get(paths[0].trim());
         if (n == null) {
+            n = childs.get("*" + paths[0].trim());
+            if (n != null) {
+                matches.add(paths[0].trim());
+            }
+        }
+        if (n == null) {
             n = childs.get("*");
             if (n != null) {
                 matches.add(paths[0].trim());
