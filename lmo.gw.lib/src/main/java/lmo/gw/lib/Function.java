@@ -138,7 +138,20 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         String response = null;
         ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
         Map<String, Object> ATTRS = new HashMap<String, Object>();
-        Map<String, String[]> QUERY = new HashMap<String, String[]>(req.getParameterMap());
+        Map<String, String[]> QUERY = new HashMap<String, String[]>();
+        for (String key : req.getParameterMap().keySet()) {
+            key = key.toLowerCase();
+            String[] values2 = QUERY.get(key);
+            if (QUERY.containsKey(key)) {
+                String[] values1 = QUERY.get(key);
+                String[] merge = new String[values1.length + values2.length];
+                System.arraycopy(values1, 0, merge, 0, values1.length);
+                System.arraycopy(values2, 0, merge, values1.length, values2.length);
+                QUERY.put(key, merge);
+            } else {
+                QUERY.put(key, values2);
+            }
+        }
         Enumeration<String> reqAttributes = req.getAttributeNames();
         while (reqAttributes.hasMoreElements()) {
             String attribute = reqAttributes.nextElement();
@@ -204,6 +217,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
                     for (String key : queryMap.keySet()) {
                         String[] values2 = queryMap.get(key).toArray(new String[]{});
                         if (QUERY.containsKey(key)) {
+                            key = key.toLowerCase();
                             String[] values1 = QUERY.get(key);
                             String[] merge = new String[values1.length + values2.length];
                             System.arraycopy(values1, 0, merge, 0, values1.length);
