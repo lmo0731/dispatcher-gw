@@ -21,7 +21,7 @@ public class FunctionRequest<T> {
     private Logger logger;
     private T requestObject;
     private ArrayList<String> pathParams;
-    private Map<String, String[]> queryParams = new HashMap<String, String[]>() {
+    private final Map<String, String[]> queryParams = new HashMap<String, String[]>() {
         @Override
         public String[] get(Object key) {
             if (key != null && key instanceof String) {
@@ -38,8 +38,8 @@ public class FunctionRequest<T> {
             return super.put(key, value); //To change body of generated methods, choose Tools | Templates.
         }
     };
-    private Map<String, Object> attributes = new HashMap<String, Object>();
-    private Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>() {
+    private final Map<String, Object> attributes = new HashMap<String, Object>();
+    private final Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>() {
         @Override
         public Enumeration<String> get(Object key) {
             if (key != null && key instanceof String) {
