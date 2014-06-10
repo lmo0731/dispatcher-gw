@@ -93,6 +93,9 @@ public class Dispatcher {
             logger.error("function not found", ex);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new DispatcherException("function not found");
+        } catch (java.io.UnsupportedEncodingException ex) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            throw new DispatcherException(ex.getMessage());
         } catch (Exception ex) {
             logger.error("function error", ex);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

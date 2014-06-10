@@ -5,8 +5,9 @@
 package lmo.gw.lib;
 
 import flexjson.ObjectFactory;
-import flexjson.ObjectFactory;
+import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lmo.utils.bson.BSONDeserializer;
@@ -24,6 +25,14 @@ public abstract class Handler<T> {
     HttpServletRequest request;
     HttpServletResponse response;
     T target;
+
+    public Handler(Class<? extends T> c) {
+        try {
+            this.target = c.newInstance();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     public Handler(T target) {
         this.target = target;
