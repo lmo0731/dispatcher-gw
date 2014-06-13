@@ -4,10 +4,12 @@
  */
 package lmo.gw.dispatcher.lib;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import lmo.utils.Pair;
 
 /**
  *
@@ -23,33 +25,21 @@ public class Node {
         return value;
     }
 
-    public Node get(String path, List<String> matches) {
-        String[] paths = path
-                .replaceFirst("^[" + SPLITTER + "]+", "")
-                .replaceFirst("[" + SPLITTER + "]+$", "")
-                .split("[" + SPLITTER + "]+", 2);
-        Node n = childs.get(paths[0].trim());
-        if (n == null) {
-            n = childs.get("*" + paths[0].trim());
-            if (n != null) {
-                matches.add(paths[0].trim());
-            }
+    public Node get(String path, List<String> matches) throws Exception {
+        NodeMatch n = new NodeMatch();
+        n.matches = new ArrayList<String>();
+        n.node = this;
+        n.path = "";
+        List<NodeMatch> nodeMatches = n.find(path);
+        if (nodeMatches.isEmpty()) {
+            return null;
+        } else if (nodeMatches.size() == 1) {
+            NodeMatch m = nodeMatches.get(0);
+            matches.addAll(m.matches);
+            return m.node;
+        } else {
+            throw new Exception("Ambiguous for matches " + nodeMatches.toString());
         }
-        if (n == null) {
-            n = childs.get("*");
-            if (n != null) {
-                matches.add(paths[0].trim());
-            }
-        }
-        if (n != null) {
-            if (paths.length == 2) {
-                Node k = n.get(paths[1].trim(), matches);
-                return k;
-            } else {
-                return n;
-            }
-        }
-        return null;
     }
 
     public void insert(String path, String value) {
