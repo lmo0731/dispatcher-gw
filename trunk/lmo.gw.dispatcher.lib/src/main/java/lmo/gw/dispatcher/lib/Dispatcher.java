@@ -7,6 +7,7 @@ package lmo.gw.dispatcher.lib;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,7 +37,13 @@ public class Dispatcher {
         logger.debug("path: " + functionPath);
         ArrayList<String> matches = new ArrayList<String>();
         String funcname = null;
-        Node n = Config.functionPaths.get(functionPath, matches);
+        Node n;
+        try {
+            n = Config.functionPaths.get(functionPath, matches);
+        } catch (Exception ex) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new DispatcherException(ex.getMessage());
+        }
         if (n != null && n.getValue() != null) {
             funcname = n.getValue();
             request.setAttribute(Attribute.PATHPARAMS, matches);
