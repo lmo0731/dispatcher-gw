@@ -11,6 +11,7 @@ import java.io.Writer;
 import java.util.Date;
 import lmo.utils.bson.factory.BSONBinaryFactory;
 import lmo.utils.bson.factory.BSONDateFactory;
+import lmo.utils.bson.factory.BSONNullTransformer;
 import lmo.utils.bson.factory.BSONObjectIdFactory;
 
 /**
@@ -24,6 +25,7 @@ public class BSONSerializer extends JSONSerializer {
         this.transform(new BSONDateFactory(), Date.class);
         this.transform(new BSONBinaryFactory(), ByteArrayOutputStream.class);
         this.transform(new BSONObjectIdFactory(), ObjectId.class);
+        this.transform(new BSONNullTransformer(), void.class);
     }
 
     @Override
