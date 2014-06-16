@@ -45,8 +45,10 @@ public class DefaultAuthenticator extends Authenticator {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             throw new DispatcherException("authentication fail");
         }
+        logger.debug("ip: '" + request.getRemoteAddr() + "'");
+        logger.debug("ips: " + DefaultConfigReloader.userips.get(user));
         if (!DefaultConfigReloader.userips.containsKey(user)
-                || (!DefaultConfigReloader.userips.get(user).contains(request.getRemoteAddr())
+                || (!DefaultConfigReloader.userips.get(user).contains(request.getRemoteAddr().trim())
                 && !DefaultConfigReloader.userips.get(user).contains("*"))) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             throw new DispatcherException("permission denied. " + request.getRemoteAddr());
