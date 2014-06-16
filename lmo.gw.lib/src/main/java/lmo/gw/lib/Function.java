@@ -286,6 +286,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
                 }
             }
         } catch (JSONException ex) {
+            logger.debug("Bad request", ex);
             resp.setContentType(TEXT_PLAIN);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = "Bad request";
