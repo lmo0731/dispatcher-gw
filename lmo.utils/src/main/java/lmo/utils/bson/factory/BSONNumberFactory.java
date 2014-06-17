@@ -21,13 +21,7 @@ public class BSONNumberFactory implements ObjectFactory {
             return null;
         }
         if (value instanceof JsonNumber) {
-            JsonNumber jsonnumber = (JsonNumber) value;
-            Number number;
-            if (jsonnumber.isDecimal()) {
-                number = jsonnumber.doubleValue();
-            } else {
-                number = jsonnumber.longValue();
-            }
+            JsonNumber number = (JsonNumber) value;
             if (targetType == Integer.class) {
                 return number.intValue();
             }
@@ -49,7 +43,11 @@ public class BSONNumberFactory implements ObjectFactory {
             if (targetType == String.class) {
                 return "" + number.doubleValue();
             }
-            return number.doubleValue();
+            if (number.isDecimal()) {
+                return number.doubleValue();
+            } else {
+                return number.longValue();
+            }
         }
         throw new JSONException(context.getCurrentPath().toString() + " is not number object");
     }
