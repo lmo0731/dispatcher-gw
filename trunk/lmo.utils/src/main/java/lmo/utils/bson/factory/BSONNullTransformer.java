@@ -5,6 +5,7 @@
 package lmo.utils.bson.factory;
 
 import flexjson.transformer.AbstractTransformer;
+import java.util.Iterator;
 
 /**
  *
@@ -19,5 +20,14 @@ public class BSONNullTransformer extends AbstractTransformer {
 
     @Override
     public void transform(Object object) {
+        Object a = getContext().getObjectStack().get(1);
+        if (a == null) {
+        } else if (a instanceof Iterable) {
+            getContext().write(null);
+        } else if (a instanceof Iterator) {
+            getContext().write(null);
+        } else if (a.getClass().isArray()) {
+            getContext().write(null);
+        }
     }
 }
