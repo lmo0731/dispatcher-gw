@@ -158,8 +158,8 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         } else if (req.getMethod().equals("DELETE")) {
             handler = this.delete();
         }
+        boolean begin = false;
         try {
-            begin(ATTRS, req, request, logger);
             if (req.getDispatcherType() != DispatcherType.FORWARD && req.getDispatcherType() != DispatcherType.INCLUDE) {
                 throw new FunctionException(HttpServletResponse.SC_FORBIDDEN, "not gateway request");
             }
@@ -171,6 +171,8 @@ public abstract class Function extends HttpServlet implements ConfigListener {
             if (handler == null) {
                 throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "method not allowed");
             }
+            begin(ATTRS, req, request, logger);
+            begin = true;
             handler.request = req;
             handler.response = resp;
             if (req.getContentType() == null || req.getContentType().isEmpty()) {
@@ -305,11 +307,13 @@ public abstract class Function extends HttpServlet implements ConfigListener {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response = "Internal error";
         } finally {
-            end(ATTRS, resp, response, logger);
-        }
-        if (resHeaders != null) {
-            for (Entry<String, String> e : resHeaders.entrySet()) {
-                resp.setHeader(e.getKey(), e.getValue());
+            if (resHeaders != null) {
+                for (Entry<String, String> e : resHeaders.entrySet()) {
+                    resp.setHeader(e.getKey(), e.getValue());
+                }
+            }
+            if (begin) {
+                end(ATTRS, resp, response, logger);
             }
         }
         try {
