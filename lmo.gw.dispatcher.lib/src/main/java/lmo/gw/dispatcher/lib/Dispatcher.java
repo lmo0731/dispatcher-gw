@@ -86,12 +86,15 @@ public class Dispatcher {
         logger.info("Dispatching request to /" + contextName + "/" + servletPath);
         try {
             StringBuilder sb = new StringBuilder();
-            while (true) {
-                String s = request.getReader().readLine();
-                if (s == null) {
-                    break;
+            try {
+                while (true) {
+                    String s = request.getReader().readLine();
+                    if (s == null) {
+                        break;
+                    }
+                    sb.append(s);
                 }
-                sb.append(s);
+            } catch (Exception ex) {
             }
             logger.info("request: " + sb.toString());
             request.setAttribute(Attribute.REQUEST, sb.toString());
