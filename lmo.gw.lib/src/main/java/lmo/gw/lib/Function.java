@@ -97,12 +97,6 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         this.init(logger, p);
     }
 
-    protected void begin(Map<String, Object> params, HttpServletRequest request, String raw, Logger logger) {
-    }
-
-    protected void end(Map<String, Object> params, HttpServletResponse response, String raw, Logger logger) {
-    }
-
     protected abstract void init(Logger logger, Properties p) throws ServletException;
 
     protected abstract void destroy(Logger logger);
@@ -134,16 +128,8 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         }
         String REQID = (String) req.getAttribute(Attribute.REQID);
         String funcname = (String) req.getAttribute(Attribute.FUNCNAME);
-        String request = (String) req.getAttribute(Attribute.REQUEST);
-        String response = null;
         ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
-        Map<String, Object> ATTRS = new HashMap<String, Object>();
         Map<String, String[]> QUERY = new HashMap<String, String[]>(req.getParameterMap());
-        Enumeration<String> reqAttributes = req.getAttributeNames();
-        while (reqAttributes.hasMoreElements()) {
-            String attribute = reqAttributes.nextElement();
-            ATTRS.put(attribute, req.getAttribute(attribute));
-        }
         Logger logger = Logger.getLogger(funcname + "." + REQID);
         Object responseObject = null;
         boolean xml = false;
@@ -166,18 +152,15 @@ public abstract class Function extends HttpServlet implements ConfigListener {
             resp.setCharacterEncoding(req.getCharacterEncoding());
             logger.info("request method: " + req.getMethod());
             logger.info("request query: " + req.getQueryString());
-            logger.info("request received: " + request);
             Object o = null;
             if (handler == null) {
                 throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "method not allowed");
             }
-            begin(ATTRS, req, request, logger);
-            begin = true;
             handler.request = req;
             handler.response = resp;
             if (req.getContentType() == null || req.getContentType().isEmpty()) {
                 xml = false;
-                resp.setContentType(APPLICATION_JSON);
+
             } else if (req.getContentType().toLowerCase().contains(APPLICATION_XML.toLowerCase())) {
                 xml = true;
                 resp.setContentType(APPLICATION_XML);
@@ -311,9 +294,6 @@ public abstract class Function extends HttpServlet implements ConfigListener {
                 for (Entry<String, String> e : resHeaders.entrySet()) {
                     resp.setHeader(e.getKey(), e.getValue());
                 }
-            }
-            if (begin) {
-                end(ATTRS, resp, response, logger);
             }
         }
         try {

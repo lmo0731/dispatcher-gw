@@ -18,8 +18,8 @@ import org.apache.log4j.Logger;
 public class FunctionRequest<T> {
 
     private String requestId;
-    private Logger logger;
-    private T requestObject;
+    private final Logger logger;
+    private final T requestObject;
     private ArrayList<String> pathParams;
     private final Map<String, String[]> queryParams = new HashMap<String, String[]>();
     private final Map<String, Object> attributes = new HashMap<String, Object>();
