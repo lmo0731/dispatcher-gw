@@ -22,12 +22,12 @@ public class ConfigLoader {
 
     public static Logger logger = Logger.getLogger(ConfigLoader.class);
 
-    public static void load(Object o, String p, String prefix) throws FileNotFoundException, IOException {
+    public static int load(Object o, String p, String prefix) throws FileNotFoundException, IOException {
         Properties prop = new Properties();
         InputStream in = new FileInputStream(p);
         try {
             prop.load(in);
-            ConfigLoader.load(o, prop, prefix);
+            return ConfigLoader.load(o, prop, prefix);
         } finally {
             try {
                 in.close();
@@ -36,15 +36,16 @@ public class ConfigLoader {
         }
     }
 
-    public static void load(Object o, Properties p) {
-        load(o, p, null);
+    public static int load(Object o, Properties p) {
+        return load(o, p, null);
     }
 
-    public static void load(Object o, String p) throws FileNotFoundException, IOException {
-        load(o, p, null);
+    public static int load(Object o, String p) throws FileNotFoundException, IOException {
+        return load(o, p, null);
     }
 
-    public static void load(Object o, Properties p, String prefix) {
+    public static int load(Object o, Properties p, String prefix) {
+        int ret = 0;
         Class c;
         if (o.getClass() == Class.class) {
             c = (Class) o;
@@ -53,13 +54,38 @@ public class ConfigLoader {
         }
         for (Field f : c.getFields()) {
             String key = (prefix == null ? "" : (prefix + ".")) + f.getName();
+            boolean required = false;
+            if (f.isAnnotationPresent(ConfigName.class)) {
+                ConfigName name = f.getAnnotation(ConfigName.class);
+                if (!name.value().equals("##default")) {
+                    key = (prefix == null ? "" : (prefix + ".")) + name.value();
+                }
+                required = name.required();
+            }
             String value = p.getProperty(key);
             if (value != null) {
                 try {
-                    Object v = parse(f.getType(), value);
+                    Object v = parse(f.getType(), value, p, key);
                     if (v != null) {
                         f.set(o, v);
                         logger.debug(o + "." + f.getName() + " = " + f.get(o));
+                        ret++;
+                    } else if (required) {
+                        logger.warn(o + "." + f.getName() + " is required");
+                    }
+                } catch (Exception ex) {
+                    logger.info("", ex);
+                    continue;
+                }
+            } else {
+                try {
+                    Object v = parse(f.getType(), value, p, key);
+                    if (v != null) {
+                        f.set(o, v);
+                        logger.debug(o + "." + f.getName() + " = " + f.get(o));
+                        ret++;
+                    } else if (required) {
+                        logger.warn(key + " is missing");
                     }
                 } catch (Exception ex) {
                     logger.info("", ex);
@@ -67,9 +93,10 @@ public class ConfigLoader {
                 }
             }
         }
+        return ret;
     }
 
-    public static Object parse(Class type, String value) {
+    public static Object parse(Class type, String value, Properties p, String prefix) {
         Object v = null;
         if (type == Integer.class || type == Integer.TYPE) {
             v = Integer.parseInt(value);
@@ -92,14 +119,24 @@ public class ConfigLoader {
                 String[] splitted = split(value, ",");
                 Object[] o = (Object[]) Array.newInstance(type.getComponentType(), splitted.length);
                 for (int i = 0; i < splitted.length; i++) {
-                    o[i] = (parse(type.getComponentType(), splitted[i].trim()));
+                    o[i] = (parse(type.getComponentType(), splitted[i].trim(), p, prefix));
                 }
                 v = o;
             } else {
                 logger.warn("Unsupported array type: " + type.getComponentType() + "[]");
             }
         } else {
-            logger.warn("Unsupported type: " + type);
+            try {
+                Object o = type.newInstance();
+                int k = load(o, p, prefix);
+                if (k > 0) {
+                    return o;
+                }
+            } catch (InstantiationException ex) {
+                logger.warn("Construct error: " + type);
+            } catch (IllegalAccessException ex) {
+                logger.warn("Access error: " + type);
+            }
         }
         return v;
     }
