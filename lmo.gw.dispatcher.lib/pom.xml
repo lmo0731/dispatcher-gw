@@ -4,7 +4,7 @@
 
   <groupId>lmo</groupId>
   <artifactId>lmo.gw.dispatcher.lib</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>lmo.gw.dispatcher.lib</name>
@@ -27,4 +27,7 @@
       <version>1.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
+    <description>1.1-SNAPSHOT
+dispacher request body-g unshihguigger dispatch hiideg bolson
+</description>
 </project>
