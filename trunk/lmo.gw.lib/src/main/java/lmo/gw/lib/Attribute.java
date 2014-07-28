@@ -10,8 +10,9 @@ package lmo.gw.lib;
  */
 public class Attribute {
 
-    public static final String REQID = "lmo.gw.lib.Attribute.REQID";
-    public static final String PATHPARAMS = "lmo.gw.lib.Attribute.PATHPARAMS";
-    public static final String PATH = "lmo.gw.lib.Attribute.PATH";
-    public static final String FUNCNAME = "lmo.gw.lib.Attribute.FUNCNAME";
+    public static final String REQID = "REQID";
+    public static final String PATHPARAMS = "PATHPARAMS";
+    public static final String REQUEST = "REQUEST";
+    public static final String RESPONSE = "RESPONSE";
+    public static final String FUNCNAME = "FUNCNAME";
 }

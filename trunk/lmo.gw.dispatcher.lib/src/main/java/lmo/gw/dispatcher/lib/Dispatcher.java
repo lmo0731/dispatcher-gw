@@ -7,13 +7,13 @@ package lmo.gw.dispatcher.lib;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lmo.gw.lib.Attribute;
-import lmo.gw.lib.FunctionException;
 import org.apache.log4j.Logger;
 
 /**
@@ -42,17 +42,16 @@ public class Dispatcher {
             n = Config.functionPaths.get(functionPath, matches);
         } catch (Exception ex) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw new DispatcherException(ex.getMessage(), ex);
+            throw new DispatcherException(ex.getMessage());
         }
         if (n != null && n.getValue() != null) {
             funcname = n.getValue();
             request.setAttribute(Attribute.PATHPARAMS, matches);
-            request.setAttribute(Attribute.PATH, functionPath);
             request.setAttribute(Attribute.FUNCNAME, funcname);
         }
         if (funcname == null || !Config.functions.containsKey(funcname)) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            throw new DispatcherException("Not found", new Exception("Requested function not found"));
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            throw new DispatcherException("requested function not found");
         }
         return funcname;
     }
@@ -74,27 +73,43 @@ public class Dispatcher {
         logger.debug("function context: /" + contextName + ", servlet: /" + servletPath);
         ServletContext cxt = request.getServletContext().getContext("/" + contextName);
         if (cxt == null) {
+            logger.error("context not found: /" + contextName);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw new DispatcherException("Not found", new Exception("context not found: /" + contextName));
+            throw new DispatcherException("function not found");
         }
         RequestDispatcher dispatcher = cxt.getRequestDispatcher("/" + servletPath);
         if (dispatcher == null) {
             logger.error("path not found: /" + servletPath);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw new DispatcherException("Not found", new Exception("path not found: /" + servletPath));
+            throw new DispatcherException("function not found");
         }
         logger.info("Dispatching request to /" + contextName + "/" + servletPath);
         try {
+            StringBuilder sb = new StringBuilder();
+            try {
+                while (true) {
+                    String s = request.getReader().readLine();
+                    if (s == null) {
+                        break;
+                    }
+                    sb.append(s);
+                }
+            } catch (Exception ex) {
+            }
+            logger.info("request: " + sb.toString());
+            request.setAttribute(Attribute.REQUEST, sb.toString());
             dispatcher.forward(request, response);
         } catch (FileNotFoundException ex) {
+            logger.error("function not found", ex);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw new DispatcherException("Not found", new Exception("function not found", ex));
+            throw new DispatcherException("function not found");
         } catch (java.io.UnsupportedEncodingException ex) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            throw new DispatcherException(ex.getMessage(), ex);
+            throw new DispatcherException(ex.getMessage());
         } catch (Exception ex) {
+            logger.error("function error", ex);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw new DispatcherException("Internal error", ex);
+            throw new DispatcherException("internal error");
         }
     }
 }
