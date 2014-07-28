@@ -43,7 +43,6 @@ public class DispatcherServlet extends HttpServlet {
             Dispatcher d = new Dispatcher("" + REQID, Config.authenticator);
             d.processRequest(request, response);
         } catch (DispatcherException ex) {
-            logger.error("Dispatch error", ex);
             try {
                 Config.errorHandler.handle(response, logger, ex);
             } finally {
