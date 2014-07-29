@@ -14,7 +14,7 @@ import javax.xml.bind.Unmarshaller;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 final public class XmlUtil {
 

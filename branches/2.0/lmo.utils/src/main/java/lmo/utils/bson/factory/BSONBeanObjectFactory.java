@@ -16,7 +16,7 @@ import lmo.utils.bson.BSONValidator;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class BSONBeanObjectFactory extends BeanObjectFactory {
 

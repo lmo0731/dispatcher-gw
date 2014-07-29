@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public abstract class Function extends HttpServlet implements ConfigListener {
 

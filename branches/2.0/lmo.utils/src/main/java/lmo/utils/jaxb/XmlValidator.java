@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class XmlValidator {
 

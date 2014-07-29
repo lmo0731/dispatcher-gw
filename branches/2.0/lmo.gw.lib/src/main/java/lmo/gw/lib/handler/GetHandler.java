@@ -8,7 +8,7 @@ import lmo.gw.lib.Handler;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public abstract class GetHandler extends Handler<Object> {
 

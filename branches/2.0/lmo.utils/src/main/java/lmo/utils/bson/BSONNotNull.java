@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 @Retention(RUNTIME)
 @Target({FIELD, METHOD, TYPE})
