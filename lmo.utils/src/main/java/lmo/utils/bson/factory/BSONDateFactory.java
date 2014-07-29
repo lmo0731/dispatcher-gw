@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class BSONDateFactory extends AbstractTransformer implements ObjectFactory {
 

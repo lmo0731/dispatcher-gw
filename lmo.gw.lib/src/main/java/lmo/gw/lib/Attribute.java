@@ -6,7 +6,7 @@ package lmo.gw.lib;
  */
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class Attribute {
 

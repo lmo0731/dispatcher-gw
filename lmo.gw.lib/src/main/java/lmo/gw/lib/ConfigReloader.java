@@ -5,7 +5,6 @@
 package lmo.gw.lib;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -19,13 +18,14 @@ import org.apache.log4j.PropertyConfigurator;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class ConfigReloader implements ConfigReloaderMBean {
 
     ConfigListener listener;
     String name;
     static boolean isLoading = false;
+    static boolean first = true;
     static final Object lock = new Object();
     Logger logger;
 
@@ -60,10 +60,12 @@ public class ConfigReloader implements ConfigReloaderMBean {
         isLoading = true;
         synchronized (lock) {
             try {
-                try {
-                    listener.destroy();
-                } catch (Exception ex) {
-                    logger.warn("", ex);
+                if (!first) {
+                    try {
+                        listener.destroy();
+                    } catch (Exception ex) {
+                        logger.warn("", ex);
+                    }
                 }
                 System.setProperty("lmo.gw.function", listener.getName());
                 BasicConfigurator.configure();
@@ -88,17 +90,13 @@ public class ConfigReloader implements ConfigReloaderMBean {
             } finally {
                 lock.notify();
                 isLoading = false;
+                first = false;
             }
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(baos);
-
         p.list(writer);
-
         writer.flush();
-
-        return baos.toString(
-                "UTF-8");
-
+        return baos.toString("UTF-8");
     }
 }

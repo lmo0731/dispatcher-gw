@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class HttpRequest {
 

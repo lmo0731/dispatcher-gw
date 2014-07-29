@@ -11,7 +11,7 @@ import lmo.utils.Pair;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class HttpResponse {
 

@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com> <munkhochir@munkhochir.mn>
+ * @munkhochir<lmo0731@gmail.com> <munkhochir@munkhochir.mn>
  */
 public class ConfigLoader {
 

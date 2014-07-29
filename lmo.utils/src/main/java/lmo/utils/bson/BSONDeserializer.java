@@ -19,7 +19,7 @@ import lmo.utils.bson.factory.BSONObjectIdFactory;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class BSONDeserializer<T> extends JSONDeserializer<T> {
 

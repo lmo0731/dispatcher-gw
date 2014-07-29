@@ -12,20 +12,19 @@ import java.util.Map;
  */
 public class MapUtil {
 
-    public static Object getResult(Object o, String path, Class c) {
+    public static <T> T get(Object o, String path, Class<T> c) {
         if (path == null) {
-            return o;
+            return null;
         }
         if (o == null) {
             return null;
         }
         try {
-
             String[] keys = path.split("[.]", 2);
             if (o instanceof Map) {
                 Object k = ((Map) o).get(keys[0]);
                 if (keys.length == 2) {
-                    return getResult(k, keys[1], c);
+                    return get(k, keys[1], c);
                 } else {
                     return c.cast(k);
                 }

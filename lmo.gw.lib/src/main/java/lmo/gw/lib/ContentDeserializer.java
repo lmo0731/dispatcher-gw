@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author LMO
  */
-public abstract class HandlerObjectBinder<T> {
+public abstract class ContentDeserializer<T> {
 
     protected abstract void bind(HttpServletRequest req, HttpServletResponse resp, T target) throws FunctionException;
 }

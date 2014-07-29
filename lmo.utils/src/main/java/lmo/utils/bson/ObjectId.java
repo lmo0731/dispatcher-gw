@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class ObjectId implements Serializable {
 

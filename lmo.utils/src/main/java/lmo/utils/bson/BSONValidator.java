@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class BSONValidator {
 

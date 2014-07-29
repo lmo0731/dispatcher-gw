@@ -15,7 +15,7 @@ import lmo.utils.bson.ObjectId;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class BSONObjectIdFactory extends AbstractTransformer implements ObjectFactory {
 
@@ -34,7 +34,6 @@ public class BSONObjectIdFactory extends AbstractTransformer implements ObjectFa
     }
 
     Object getObjectId(Object value) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         if (value instanceof Map) {
             Map map = (Map) value;
             if (map.containsKey("$oid") && map.size() == 1) {
