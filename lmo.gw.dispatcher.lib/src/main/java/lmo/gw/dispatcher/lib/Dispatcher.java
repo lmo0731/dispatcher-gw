@@ -47,7 +47,6 @@ public class Dispatcher {
         if (n != null && n.getValue() != null) {
             funcname = n.getValue();
             request.setAttribute(Attribute.PATHPARAMS, matches);
-            request.setAttribute(Attribute.PATH, functionPath);
             request.setAttribute(Attribute.FUNCNAME, funcname);
         }
         if (funcname == null || !Config.functions.containsKey(funcname)) {

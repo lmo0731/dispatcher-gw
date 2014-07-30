@@ -4,15 +4,7 @@
  */
 package lmo.gw.lib;
 
-import flexjson.JSONException;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -27,9 +19,6 @@ import lmo.gw.lib.handler.DeleteHandler;
 import lmo.gw.lib.handler.GetHandler;
 import lmo.gw.lib.handler.PostHandler;
 import lmo.gw.lib.handler.PutHandler;
-import lmo.utils.bson.BSONNotNull;
-import lmo.utils.bson.BSONSerializer;
-import lmo.utils.jaxb.XmlUtil;
 import org.apache.log4j.Logger;
 
 /**
@@ -38,13 +27,9 @@ import org.apache.log4j.Logger;
  */
 public abstract class Function extends HttpServlet implements ConfigListener {
 
-    public static final String APPLICATION_JSON = "application/json";
-    public static final String APPLICATION_XML = "application/xml";
-    public static final String X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-    public static final String TEXT_PLAIN = "text/plain";
-    Logger logger;
-    String name = "Function";
-    ConfigReloader mbean;
+    private Logger logger;
+    private String name = "Function";
+    private ConfigReloader mbean;
 
     public String getName() {
         return name;
@@ -75,9 +60,8 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         this.name = name;
         this.logger = Logger.getLogger("FUNC." + name.toUpperCase());
         mbean = new ConfigReloader(this);
-        mbean.register();
         try {
-            this.logger.info(mbean.reload());
+            mbean.register();
         } catch (Exception ex) {
             this.logger.error("reloading config", ex);
         }
@@ -128,10 +112,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         }
         String REQID = (String) req.getAttribute(Attribute.REQID);
         String funcname = (String) req.getAttribute(Attribute.FUNCNAME);
-        ArrayList<String> PATHPARARMS = (ArrayList<String>) req.getAttribute(Attribute.PATHPARAMS);
-        Map<String, String[]> QUERY = new HashMap<String, String[]>(req.getParameterMap());
         Logger logger = Logger.getLogger(funcname + "." + REQID);
-        Object responseObject = null;
         boolean xml = false;
         Handler handler = null;
         Map<String, String> resHeaders = null;
@@ -147,162 +128,64 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         boolean begin = false;
         try {
             if (req.getDispatcherType() != DispatcherType.FORWARD && req.getDispatcherType() != DispatcherType.INCLUDE) {
-                throw new FunctionException(HttpServletResponse.SC_FORBIDDEN, "not gateway request");
+                throw new FunctionException(HttpServletResponse.SC_FORBIDDEN, "Not gateway request.");
             }
             resp.setCharacterEncoding(req.getCharacterEncoding());
             logger.info("request method: " + req.getMethod());
             logger.info("request query: " + req.getQueryString());
-            Object o = null;
             if (handler == null) {
-                throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "method not allowed");
+                throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Method not allowed.");
             }
-            handler.request = req;
-            handler.response = resp;
-            if (req.getContentType() == null || req.getContentType().isEmpty()) {
-                xml = false;
-
-            } else if (req.getContentType().toLowerCase().contains(APPLICATION_XML.toLowerCase())) {
-                xml = true;
-                resp.setContentType(APPLICATION_XML);
-            } else if (req.getContentType().toLowerCase().contains(APPLICATION_JSON.toLowerCase())) {
-                xml = false;
-                resp.setContentType(APPLICATION_JSON);
-            } else if (req.getContentType().toLowerCase().contains(X_WWW_FORM_URLENCODED.toLowerCase())) {
-                if (request != null) {
-                    String[] pairs = request.split("&");
-                    Map<String, List<String>> queryMap = new HashMap<String, List<String>>();
-                    for (String pair : pairs) {
-                        String[] kv = pair.split("=", 2);
-                        if (kv.length == 2) {
-                            try {
-                                String key = URLDecoder.decode(kv[0], "UTF-8");
-                                String value = URLDecoder.decode(kv[1], "UTF-8");
-                                if (queryMap.containsKey(key)) {
-                                    queryMap.get(key).add(value);
-                                } else {
-                                    queryMap.put(key, new ArrayList<String>(Arrays.asList(new String[]{value})));
-                                }
-                            } catch (Exception ex) {
-                            }
-                        }
-                    }
-                    for (String key : queryMap.keySet()) {
-                        String[] values2 = queryMap.get(key).toArray(new String[]{});
-                        if (QUERY.containsKey(key)) {
-                            String[] values1 = QUERY.get(key);
-                            String[] merge = new String[values1.length + values2.length];
-                            System.arraycopy(values1, 0, merge, 0, values1.length);
-                            System.arraycopy(values2, 0, merge, values1.length, values2.length);
-                            QUERY.put(key, merge);
-                        } else {
-                            QUERY.put(key, values2);
-                        }
-                    }
-                }
-                xml = false;
-                resp.setContentType(APPLICATION_JSON);
-            } else {
-                resp.setHeader("Accept", APPLICATION_JSON + ", " + APPLICATION_XML);
-                throw new FunctionException(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable Content-Type: " + req.getContentType());
-            }
-
-            if (request.isEmpty()) {
-                o = null;
-            } else {
-                logger.info("Content-Type: " + req.getContentType());
-                if (xml) {
-                    try {
-                        o = XmlUtil.unmarshal(request, handler.target.getClass());
-                    } catch (Exception ex) {
-                        logger.warn("XML unmarhsalling", ex);
-                        throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
-                    }
-                } else {
-                    try {
-                        if (handler.target != null && handler.target instanceof Collection) {
-                            handler.deserializer.use("values", handler.target.getClass().getComponentType());
-                        }
-                        if (handler.target != null && handler.target.getClass() != Object.class) {
-                            o = handler.deserializer.deserializeInto(request, handler.target);
-                        } else {
-                            o = handler.deserializer.deserialize(request);
-                        }
-                    } catch (Exception ex) {
-                        logger.warn("JSON unmarhsalling", ex);
-                        throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+            ContentBinder binder = null;
+            for (Object k : handler.binders.keySet()) {
+                if (k instanceof String) {
+                    if (req.getContentType().toLowerCase().startsWith(((String) k).toLowerCase())) {
+                        binder = (ContentBinder) handler.binders.get(k);
+                        break;
                     }
                 }
             }
-            if (handler.target != null && handler.target.getClass().isAnnotationPresent(BSONNotNull.class) && o == null) {
-                throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, "request must not be null");
+            if (binder == null) {
+                String accept = handler.binders.keySet().toString();
+                resp.setHeader("Accept", accept.substring(1, accept.length() - 1));
+                throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
             }
-            FunctionRequest funcReq = handler.getRequest(logger, funcname, o, QUERY);
-            funcReq.setRequestId(REQID);
-            funcReq.setPathParams(PATHPARARMS);
-            funcReq.getAttributes().putAll(ATTRS);
-            Enumeration<String> reqHeaders = req.getHeaderNames();
-            while (reqHeaders.hasMoreElements()) {
-                String header = reqHeaders.nextElement();
-                funcReq.getHeaders().put(header, req.getHeaders(header));
+            Object reqObj = null;
+            try {
+                reqObj = binder.deserialize(req.getInputStream(), handler.target);
+            } catch (ContentBindException ex) {
+                throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage(), ex);
             }
-            FunctionResponse funcRes = new FunctionResponse();
+            FunctionRequest funcReq = handler.getRequest(logger, funcname, reqObj, req);
+            FunctionResponse funcRes = new FunctionResponse(resp);
             handler.handle(funcReq, funcRes);
             resp.setStatus(funcRes.getCode());
-            resHeaders = funcRes.getHeaders();
-            responseObject = funcRes.getResponseObject();
-            if (xml) {
-                if (responseObject != null) {
-                    try {
-                        response = XmlUtil.marshal(responseObject);
-                    } catch (Exception ex) {
-                        logger.warn(o, ex);
-                        resp.setContentType(TEXT_PLAIN);
-                        throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Unsupported Content-Type: " + req.getContentType() + ", Request processed");
-                    }
-                } else {
-                    resp.setContentType(TEXT_PLAIN);
-                    response = "";
-                }
-            } else {
-                if (handler != null) {
-                    response = handler.serializer.serialize(responseObject);
-                } else {
-                    response = new BSONSerializer().serialize(responseObject);
-                }
+            Object resObj = funcRes.getResponseObject();
+            try {
+                binder.serialize(resObj, resp.getOutputStream());
+            } catch (ContentBindException ex) {
+                throw new FunctionException(HttpServletResponse.SC_NO_CONTENT);
             }
-        } catch (JSONException ex) {
-            logger.debug("Bad request", ex);
-            resp.setContentType(TEXT_PLAIN);
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response = "Bad request";
         } catch (FunctionException ex) {
-            resp.setContentType(TEXT_PLAIN);
+            resp.setContentType("text/plain");
             if (ex.getCause() != null) {
-                logger.debug("Code: " + ex.code);
                 logger.debug("Function error cause", ex);
             }
             resp.setStatus(ex.getCode());
-            resHeaders = ex.getHeaders();
-            response = ex.getMessage();
+            resp.getWriter().append(ex.getMessage());
         } catch (Exception ex) {
-            resp.setContentType(TEXT_PLAIN);
-            logger.error("Internal error", ex);
+            resp.setContentType("text/plain");
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response = "Internal error";
+            logger.error("Internal error.", ex);
+            resp.getWriter().append("Internal error.");
         } finally {
-            if (resHeaders != null) {
-                for (Entry<String, String> e : resHeaders.entrySet()) {
-                    resp.setHeader(e.getKey(), e.getValue());
-                }
+            try {
+                resp.getWriter().flush();
+                resp.getWriter().close();
+            } catch (Exception ex) {
             }
+            logger.info("DONE: " + resp.getStatus());
         }
-        try {
-            logger.info("response: " + response);
-            resp.getWriter().write(response);
-        } catch (Exception ex) {
-            logger.warn("sending response", ex);
-        }
-        logger.info("DONE: " + resp.getStatus());
     }
 
     @Override

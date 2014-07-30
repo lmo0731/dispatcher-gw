@@ -5,48 +5,31 @@
 package lmo.gw.lib;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 
 /**
  *
+ * @param <T>
  * @munkhochir<lmo0731@gmail.com>
  */
 public class FunctionRequest<T> {
 
-    private String requestId;
+    private final String requestId;
     private final Logger logger;
+    private final ArrayList<String> pathParams = new ArrayList<String>();
+    private final String functionName;
+    private final HttpServletRequest request;
     private final T requestObject;
-    private ArrayList<String> pathParams;
-    private final Map<String, String[]> queryParams = new HashMap<String, String[]>();
-    private final Map<String, Object> attributes = new HashMap<String, Object>();
-    private final Map<String, Enumeration<String>> headers = new HashMap<String, Enumeration<String>>() {
-        @Override
-        public Enumeration<String> get(Object key) {
-            if (key != null && key instanceof String) {
-                key = key.toString().toLowerCase();
-            }
-            return super.get(key);
-        }
 
-        @Override
-        public Enumeration<String> put(String key, Enumeration<String> value) {
-            if (key != null) {
-                key = key.toLowerCase();
-            }
-            return super.put(key, value);
-        }
-    };
-    private String functionName;
-
-    public FunctionRequest(Logger logger, String functionName, T requestObject, Map<String, String[]> params) {
+    public FunctionRequest(Logger logger, String functionName, T requestObject, HttpServletRequest request) {
         this.functionName = functionName;
         this.logger = logger;
         this.requestObject = requestObject;
-        this.queryParams.putAll(params);
+        this.request = request;
+        this.requestId = (String) request.getAttribute(Attribute.REQID);
+        this.pathParams.addAll((Collection<? extends String>) request.getAttribute(Attribute.PATHPARAMS));
     }
 
     public T getRequestObject() {
@@ -57,53 +40,20 @@ public class FunctionRequest<T> {
         return logger;
     }
 
-    public Map<String, String[]> getQueryParams() {
-        return queryParams;
+    public HttpServletRequest getRequest() {
+        return request;
     }
 
     public ArrayList<String> getPathParams() {
         return pathParams;
     }
 
-    public void setPathParams(ArrayList<String> pathParams) {
-        this.pathParams = pathParams;
-    }
-
-    public Object getRequestObject(Class c) throws FunctionException {
-        return FunctionRequest.cast(requestObject, "request object", c, true);
-    }
-
-    public static Object cast(Object o, String name, Class c, boolean required) throws FunctionException {
-        if (o == null) {
-            if (required) {
-                throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, String.format("%s required", name, c.getSimpleName()));
-            }
-            return null;
-        }
-        try {
-            return c.cast(o);
-        } catch (Exception ex) {
-            throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, String.format("%s type must be %s", name, c.getSimpleName()));
-        }
-    }
-
     public String getRequestId() {
         return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
-
-    public Map<String, Enumeration<String>> getHeaders() {
-        return headers;
     }
 
     public String getFunctionName() {
         return functionName;
     }
 
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
 }

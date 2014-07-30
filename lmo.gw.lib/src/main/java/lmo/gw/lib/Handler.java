@@ -4,37 +4,28 @@
  */
 package lmo.gw.lib;
 
-import java.util.Map;
+import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import lmo.gw.lib.handler.binder.JsonContentBinder;
 import org.apache.log4j.Logger;
 
 /**
  *
- * @munkhochir<lmo0731@gmail.com> 
+ * @munkhochir<lmo0731@gmail.com>
  */
 public abstract class Handler<T> {
 
-    Map<String, ContentDeserializer> binders;
-    HttpServletRequest request;
-    HttpServletResponse response;
-    T target;
+    Class<T> target;
+    HashMap<String, ContentBinder<T>> binders = new HashMap<String, ContentBinder<T>>();
 
-    public Handler(T target) {
+    public Handler(Class<T> target) {
         this.target = target;
+        this.binders.put("application/json", new JsonContentBinder<T>());
     }
 
-    final FunctionRequest<T> getRequest(Logger logger, String functionName, T target, Map<String, String[]> params) {
-        return new FunctionRequest<T>(logger, functionName, target, params);
+    final FunctionRequest<T> getRequest(Logger logger, String functionName, T target, HttpServletRequest req) {
+        return new FunctionRequest<T>(logger, functionName, target, req);
     }
 
     public abstract void handle(FunctionRequest<T> request, FunctionResponse response) throws FunctionException;
-
-    protected HttpServletRequest getRequest() {
-        return request;
-    }
-
-    protected HttpServletResponse getResponse() {
-        return response;
-    }
 }

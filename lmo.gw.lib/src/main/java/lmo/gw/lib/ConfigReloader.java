@@ -25,7 +25,6 @@ public class ConfigReloader implements ConfigReloaderMBean {
     ConfigListener listener;
     String name;
     static boolean isLoading = false;
-    static boolean first = true;
     static final Object lock = new Object();
     Logger logger;
 
@@ -35,38 +34,25 @@ public class ConfigReloader implements ConfigReloaderMBean {
         this.logger = Logger.getLogger("FUNC." + name + ".CONFIG");
     }
 
-    public String unregister() {
+    public void unregister() {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             ObjectName mbname = new ObjectName(name);
             mbs.unregisterMBean(mbname);
         } catch (Exception ex) {
         }
-        return "OK";
-    }
-
-    public String register() {
         try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName mbname = new ObjectName(name);
-            mbs.registerMBean(this, mbname);
+            listener.destroy();
         } catch (Exception ex) {
+            logger.warn("destroying", ex);
         }
-        return "OK";
     }
 
-    public String reload() throws Exception {
+    public void register() throws Exception {
         Properties p = new Properties();
         isLoading = true;
         synchronized (lock) {
             try {
-                if (!first) {
-                    try {
-                        listener.destroy();
-                    } catch (Exception ex) {
-                        logger.warn("", ex);
-                    }
-                }
                 System.setProperty("lmo.gw.function", listener.getName());
                 BasicConfigurator.configure();
                 try {
@@ -80,23 +66,22 @@ public class ConfigReloader implements ConfigReloaderMBean {
                     logger.warn(ex.getMessage());
                 }
                 PropertyConfigurator.configure(p);
-                try {
-                    listener.init(p);
-                } catch (Exception ex) {
-                    logger.warn("", ex);
-                }
-            } catch (Exception ex) {
-                logger.warn("", ex);
+                listener.init(p);
             } finally {
                 lock.notify();
                 isLoading = false;
-                first = false;
             }
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintWriter writer = new PrintWriter(baos);
-        p.list(writer);
-        writer.flush();
-        return baos.toString("UTF-8");
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            ObjectName mbname = new ObjectName(name);
+            mbs.registerMBean(this, mbname);
+        } catch (Exception ex) {
+        }
+    }
+
+    public void reload() throws Exception {
+        this.unregister();
+        this.register();
     }
 }
