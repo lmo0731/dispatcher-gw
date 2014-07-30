@@ -16,10 +16,11 @@ public class FunctionResponse {
 
     private int code;
     private Object responseObject;
-    private Map<String, String> headers = new HashMap<String, String>();
+    private final HttpServletResponse response;
 
-    public FunctionResponse() {
-        this.code = HttpServletResponse.SC_OK;
+    public FunctionResponse(HttpServletResponse resp) {
+        this.code = HttpServletResponse.SC_NOT_IMPLEMENTED;
+        this.response = resp;
     }
 
     public void setCode(int code) {
@@ -38,7 +39,7 @@ public class FunctionResponse {
         this.responseObject = responseObject;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public HttpServletResponse getResponse() {
+        return response;
     }
 }

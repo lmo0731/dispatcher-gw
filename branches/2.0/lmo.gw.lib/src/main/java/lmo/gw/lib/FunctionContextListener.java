@@ -4,13 +4,10 @@
  */
 package lmo.gw.lib;
 
-import java.io.FileInputStream;
-import java.util.Properties;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 /**
  *
@@ -38,9 +35,8 @@ public abstract class FunctionContextListener implements ServletContextListener,
         logger = Logger.getLogger("FUNC." + name + ".CONTEXT");
         logger.info("CONTEXT INIT");
         mbean = new ConfigReloader(this);
-        mbean.register();
         try {
-            this.logger.info(mbean.reload());
+            mbean.register();
         } catch (Exception ex) {
             this.logger.error("reloading config", ex);
         }
@@ -49,7 +45,6 @@ public abstract class FunctionContextListener implements ServletContextListener,
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         try {
-            this.destroy();
             mbean.unregister();
         } catch (Exception ex) {
         }
