@@ -14,13 +14,14 @@ import lmo.gw.lib.FunctionContextListener;
  * @ munkhochir<lmo0731@gmail.com>
  */
 @WebListener()
-public class ContextListener extends FunctionContextListener {
+public class DispatcherContextListener extends FunctionContextListener {
 
-    public void init(Properties p) throws Exception {
+    public Object init(Properties p) throws Exception {
         Dispatcher.NAME = getName();
-        Config.reload(logger);
+        return Config.reload(logger);
     }
 
     public void destroy() throws Exception {
+        Config.destroy();
     }
 }

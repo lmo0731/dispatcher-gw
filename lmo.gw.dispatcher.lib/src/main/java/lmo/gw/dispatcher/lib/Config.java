@@ -9,8 +9,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.logging.Level;
 import lmo.gw.dispatcher.lib.impl.DefaultAuthenticator;
-import lmo.gw.dispatcher.lib.impl.DefaultConfigReloader;
+import lmo.gw.dispatcher.lib.impl.DefaultConfigurator;
 import lmo.gw.dispatcher.lib.impl.DefaultErrorHandler;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -23,10 +24,8 @@ public class Config {
 
     static Logger logger;
     static Authenticator authenticator = null;
-    static ConfigReloader configReloader = null;
+    static Configurator configurator = null;
     static ErrorHandler errorHandler = null;
-    static final Object lock = new Object();
-    static boolean isLoading = false;
     static HashMap<String, String> functions = new HashMap<String, String>();
     static Node functionPaths = new Node();
 
@@ -41,24 +40,16 @@ public class Config {
         FileInputStream fis = null;
         Object ret;
         try {
-            isLoading = true;
-            synchronized (lock) {
-                Config.functionPaths = new Node();
-                Config.functions.clear();
-                try {
-                    Config.destroy();
-                } catch (Exception ex) {
-                }
-                try {
-                    fis = new FileInputStream(f);
-                    properties.load(fis);
-                    PropertyConfigurator.configure(properties);
-                    ret = Config.init(properties, logger);
-                } finally {
-                    lock.notify();
-                    isLoading = false;
-                }
+            Config.functionPaths = new Node();
+            Config.functions.clear();
+            try {
+                Config.destroy();
+            } catch (Exception ex) {
             }
+            fis = new FileInputStream(f);
+            properties.load(fis);
+            PropertyConfigurator.configure(properties);
+            ret = Config.init(properties, logger);
             logger.info(ret);
             return ret;
         } catch (Exception ex) {
@@ -73,8 +64,7 @@ public class Config {
 
     public static Object init(Properties p, Logger logger) throws IOException {
         try {
-            Class authenticatorClass = Class.forName(p.getProperty("authenticator",
-                    DefaultAuthenticator.class.getCanonicalName()));
+            Class authenticatorClass = Class.forName(p.getProperty("authenticator", DefaultAuthenticator.class.getCanonicalName()));
             authenticator = (Authenticator) authenticatorClass.newInstance();
         } catch (Exception ex) {
             logger.warn("authenticator load", ex);
@@ -82,29 +72,25 @@ public class Config {
             logger.info("authenticator: " + authenticator);
         }
         try {
-            Class configReloaderClass = Class.forName(
-                    p.getProperty("configReloader",
-                            DefaultConfigReloader.class.getCanonicalName()));
-            configReloader = (ConfigReloader) configReloaderClass.newInstance();
+            Class configReloaderClass = Class.forName(p.getProperty("configurator", DefaultConfigurator.class.getCanonicalName()));
+            configurator = (Configurator) configReloaderClass.newInstance();
         } catch (Exception ex) {
-            logger.warn("configReloader load", ex);
+            logger.warn("configurator load", ex);
         } finally {
-            logger.info("configReloader: " + configReloader);
+            logger.info("configurator: " + configurator);
         }
         try {
-            Class errorHandlerClass = Class.forName(
-                    p.getProperty("errorHandler",
-                            DefaultErrorHandler.class.getCanonicalName()));
+            Class errorHandlerClass = Class.forName(p.getProperty("errorHandler", DefaultErrorHandler.class.getCanonicalName()));
             errorHandler = (ErrorHandler) errorHandlerClass.newInstance();
         } catch (Exception ex) {
             logger.warn("errorHandler load", ex);
         } finally {
             logger.info("errorHandler: " + errorHandler);
         }
-        return configReloader.reload(p, logger);
+        return configurator.configure(p, logger);
     }
 
     public static void destroy() {
-        configReloader.destroy(logger);
+        configurator.destroy(logger);
     }
 }

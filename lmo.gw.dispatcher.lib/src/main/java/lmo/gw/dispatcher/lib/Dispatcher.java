@@ -13,7 +13,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lmo.gw.lib.Attribute;
-import lmo.gw.lib.FunctionException;
 import org.apache.log4j.Logger;
 
 /**
@@ -25,11 +24,9 @@ public class Dispatcher {
     Logger logger;
     String funcname;
     public static String NAME = "GW";
-    Authenticator authenticator;
 
-    public Dispatcher(String REQID, Authenticator authenticator) {
+    public Dispatcher(String REQID) {
         logger = Logger.getLogger(Dispatcher.NAME + ".DISPATCHER." + REQID);
-        this.authenticator = authenticator;
     }
 
     protected String getFunction(HttpServletRequest request, HttpServletResponse response) throws DispatcherException {
@@ -60,8 +57,8 @@ public class Dispatcher {
             throws ServletException, IOException, DispatcherException {
         String REQID = (String) request.getAttribute(Attribute.REQID);
         String funcname = getFunction(request, response);
-        if (authenticator != null) {
-            authenticator.authenticate(request, response, funcname, logger);
+        if (Config.authenticator != null) {
+            Config.authenticator.authenticate(request, response, funcname, logger);
         }
         String functionPath = Config.functions.get(funcname);
         String path[] = functionPath.split("!", 2);

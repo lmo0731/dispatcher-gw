@@ -10,5 +10,5 @@ package lmo.gw.lib;
  */
 public interface ConfigReloaderMBean {
 
-    public void reload() throws Exception;
+    public Object reload() throws Exception;
 }

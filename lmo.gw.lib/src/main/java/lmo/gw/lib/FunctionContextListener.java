@@ -23,7 +23,7 @@ public abstract class FunctionContextListener implements ServletContextListener,
 
     protected Logger logger;
     protected String name;
-    ConfigReloader mbean;
+    public static ConfigReloader mbean;
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -32,7 +32,7 @@ public abstract class FunctionContextListener implements ServletContextListener,
                 .replaceAll("[/]+$", "");
         this.name = name;
         BasicConfigurator.configure();
-        logger = Logger.getLogger("FUNC." + name + ".CONTEXT");
+        logger = Logger.getLogger(name + ".CONTEXT");
         logger.info("CONTEXT INIT");
         mbean = new ConfigReloader(this);
         try {
@@ -44,10 +44,8 @@ public abstract class FunctionContextListener implements ServletContextListener,
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        try {
-            mbean.unregister();
-        } catch (Exception ex) {
-        }
+        mbean.unregister();
+        logger.info("CONTEXT DESTROYER");
     }
 
     public String getName() {

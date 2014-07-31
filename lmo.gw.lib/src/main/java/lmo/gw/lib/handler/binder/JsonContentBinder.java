@@ -5,10 +5,10 @@
  */
 package lmo.gw.lib.handler.binder;
 
-import flexjson.JSONDeserializer;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import lmo.gw.lib.ContentBindException;
 import lmo.gw.lib.ContentBinder;
 import lmo.utils.bson.BSONDeserializer;
@@ -25,6 +25,9 @@ public class JsonContentBinder<T> extends ContentBinder<T> {
 
     @Override
     protected T deserialize(InputStream in, Class<T> t) throws ContentBindException, Exception {
+        if (t == null) {
+            return null;
+        }
         T target = t.newInstance();
         target = deserializer.deserializeInto(new InputStreamReader(in), target);
         return target;
@@ -32,7 +35,15 @@ public class JsonContentBinder<T> extends ContentBinder<T> {
 
     @Override
     protected void serialize(Object o, OutputStream out) throws ContentBindException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String bson = serializer.deepSerialize(o);
+        PrintWriter p = new PrintWriter(out);
+        p.append(bson);
+        p.flush();
+    }
+
+    @Override
+    protected String getContentType() {
+        return "application/json";
     }
 
 }

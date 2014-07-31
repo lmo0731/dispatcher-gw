@@ -14,7 +14,7 @@ public interface ConfigListener {
 
     String getName();
 
-    void init(Properties p) throws Exception;
+    Object init(Properties p) throws Exception;
 
     void destroy() throws Exception;
 }

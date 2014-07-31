@@ -4,7 +4,7 @@
  */
 package lmo.gw.dispatcher.lib.impl;
 
-import lmo.gw.dispatcher.lib.ConfigReloader;
+import lmo.gw.dispatcher.lib.Configurator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,14 +18,14 @@ import org.apache.log4j.Logger;
  *
  * @author munkhochir <munkhochir@mobicom.mn>
  */
-public class DefaultConfigReloader extends ConfigReloader {
+public class DefaultConfigurator extends Configurator {
 
     public static HashMap<String, String> users = new HashMap<String, String>();
     public static HashMap<String, Set<String>> userips = new HashMap<String, Set<String>>();
     public static HashMap<String, Set<String>> userperms = new HashMap<String, Set<String>>();
     static BSONSerializer serializer = new BSONSerializer();
 
-    public Object reload(Properties p, Logger logger) {
+    public Object configure(Properties p, Logger logger) {
         for (String s : p.stringPropertyNames()) {
             String[] k = s.split("[.]");
             if (k.length > 1) {

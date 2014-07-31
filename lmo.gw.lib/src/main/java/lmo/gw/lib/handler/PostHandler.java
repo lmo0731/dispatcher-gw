@@ -12,7 +12,7 @@ import lmo.gw.lib.Handler;
  */
 public abstract class PostHandler<T> extends Handler<T> {
 
-    public PostHandler(T target) {
+    public PostHandler(Class<T> target) {
         super(target);
     }
 }

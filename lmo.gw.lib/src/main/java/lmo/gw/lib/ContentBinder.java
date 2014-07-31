@@ -14,6 +14,8 @@ import java.io.OutputStream;
  */
 public abstract class ContentBinder<T> {
 
+    protected abstract String getContentType();
+
     protected abstract T deserialize(InputStream in, Class<T> t) throws ContentBindException, Exception;
 
     protected abstract void serialize(Object o, OutputStream out) throws ContentBindException, Exception;
