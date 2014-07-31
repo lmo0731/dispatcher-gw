@@ -6,7 +6,6 @@ package lmo.gw.dispatcher.lib.impl;
 
 import lmo.gw.dispatcher.lib.Authenticator;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,22 +40,22 @@ public class DefaultAuthenticator extends Authenticator {
             throw new DispatcherException("authentication required");
         }
         logger.debug("user: " + user);
-        if (!pass.equals(DefaultConfigReloader.users.get(user))) {
+        if (!pass.equals(DefaultConfigurator.users.get(user))) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             throw new DispatcherException("authentication fail");
         }
         logger.debug("ip: '" + request.getRemoteAddr() + "'");
-        logger.debug("ips: " + DefaultConfigReloader.userips.get(user));
-        if (!DefaultConfigReloader.userips.containsKey(user)
-                || (!DefaultConfigReloader.userips.get(user).contains(request.getRemoteAddr().trim())
-                && !DefaultConfigReloader.userips.get(user).contains("*"))) {
+        logger.debug("ips: " + DefaultConfigurator.userips.get(user));
+        if (!DefaultConfigurator.userips.containsKey(user)
+                || (!DefaultConfigurator.userips.get(user).contains(request.getRemoteAddr().trim())
+                && !DefaultConfigurator.userips.get(user).contains("*"))) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             throw new DispatcherException("permission denied. " + request.getRemoteAddr());
         }
         String perm = (funcname + "#" + request.getMethod());
         String wildcard = (funcname + "#*");
         logger.debug("required perm: " + perm);
-        Set<String> roles = DefaultConfigReloader.userperms.get(user);
+        Set<String> roles = DefaultConfigurator.userperms.get(user);
         if (roles == null || (!roles.contains(perm) && !roles.contains(wildcard))) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             throw new DispatcherException("permission denied");

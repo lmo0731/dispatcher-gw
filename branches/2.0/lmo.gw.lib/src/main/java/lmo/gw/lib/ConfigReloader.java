@@ -4,10 +4,8 @@
  */
 package lmo.gw.lib;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import javax.management.MBeanServer;
@@ -24,14 +22,14 @@ public class ConfigReloader implements ConfigReloaderMBean {
 
     ConfigListener listener;
     String name;
-    static boolean isLoading = false;
-    static final Object lock = new Object();
+    public static boolean isLoading = false;
+    public static final Object lock = new Object();
     Logger logger;
 
     public ConfigReloader(ConfigListener listener) {
         this.listener = listener;
         this.name = "lmo.gw.function." + this.listener.getName() + ":type=Config,mbean=ConfigReloader";
-        this.logger = Logger.getLogger("FUNC." + name + ".CONFIG");
+        this.logger = Logger.getLogger(name + ".CONFIG");
     }
 
     public void unregister() {
@@ -41,17 +39,13 @@ public class ConfigReloader implements ConfigReloaderMBean {
             mbs.unregisterMBean(mbname);
         } catch (Exception ex) {
         }
-        try {
-            listener.destroy();
-        } catch (Exception ex) {
-            logger.warn("destroying", ex);
-        }
     }
 
-    public void register() throws Exception {
+    public Object register() throws Exception {
+        Object ret = null;
         Properties p = new Properties();
-        isLoading = true;
         synchronized (lock) {
+            isLoading = true;
             try {
                 System.setProperty("lmo.gw.function", listener.getName());
                 BasicConfigurator.configure();
@@ -66,10 +60,10 @@ public class ConfigReloader implements ConfigReloaderMBean {
                     logger.warn(ex.getMessage());
                 }
                 PropertyConfigurator.configure(p);
-                listener.init(p);
+                ret = listener.init(p);
             } finally {
-                lock.notify();
                 isLoading = false;
+                lock.notify();
             }
         }
         try {
@@ -78,10 +72,16 @@ public class ConfigReloader implements ConfigReloaderMBean {
             mbs.registerMBean(this, mbname);
         } catch (Exception ex) {
         }
+        return ret;
     }
 
-    public void reload() throws Exception {
+    public Object reload() throws Exception {
         this.unregister();
-        this.register();
+        try {
+            listener.destroy();
+        } catch (Exception ex) {
+            logger.warn("destroying", ex);
+        }
+        return this.register();
     }
 }

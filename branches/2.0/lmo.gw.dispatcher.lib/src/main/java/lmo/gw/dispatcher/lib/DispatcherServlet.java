@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lmo.gw.lib.Attribute;
+import lmo.gw.lib.ConfigReloader;
 import org.apache.log4j.Logger;
 
 /**
@@ -26,13 +27,15 @@ public class DispatcherServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (Config.isLoading) {
-            synchronized (Config.lock) {
+        while (ConfigReloader.isLoading) {
+            System.out.println(LOG + ": Config is loading. WAITING...");
+            synchronized (ConfigReloader.lock) {
                 try {
-                    Config.lock.wait();
+                    ConfigReloader.lock.wait(100);
                 } catch (InterruptedException ex) {
                 }
             }
+            System.out.println(LOG + ": Config is loaded.");
         }
         String REQID = String.format("%x%03x", System.currentTimeMillis(), (int) (Math.random() * 0xfff));
         response.setHeader("X-Request-Id", "" + REQID);
@@ -40,7 +43,7 @@ public class DispatcherServlet extends HttpServlet {
         Logger logger = Logger.getLogger(LOG + "." + REQID);
         logger.info(request.getMethod() + ": " + request.getRequestURI());
         try {
-            Dispatcher d = new Dispatcher("" + REQID, Config.authenticator);
+            Dispatcher d = new Dispatcher("" + REQID);
             d.processRequest(request, response);
         } catch (DispatcherException ex) {
             logger.error("Dispatch error", ex);

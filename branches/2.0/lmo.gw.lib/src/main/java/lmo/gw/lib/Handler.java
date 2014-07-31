@@ -20,6 +20,7 @@ public abstract class Handler<T> {
 
     public Handler(Class<T> target) {
         this.target = target;
+        this.binders.put(null, new JsonContentBinder<T>());
         this.binders.put("application/json", new JsonContentBinder<T>());
     }
 

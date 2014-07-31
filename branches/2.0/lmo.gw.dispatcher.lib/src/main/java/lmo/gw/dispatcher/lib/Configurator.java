@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
  *
  * @author munkhochir <munkhochir@mobicom.mn>
  */
-public abstract class ConfigReloader {
+public abstract class Configurator {
 
     public void setFunctionPattern(String name, String pattern) {
         Config.functionPaths.insert(pattern, name);
@@ -37,7 +37,7 @@ public abstract class ConfigReloader {
         return Config.functions;
     }
 
-    public abstract Object reload(Properties p, Logger logger) throws RuntimeException;
+    public abstract Object configure(Properties p, Logger logger) throws RuntimeException;
 
     public void destroy(Logger logger) {
     }

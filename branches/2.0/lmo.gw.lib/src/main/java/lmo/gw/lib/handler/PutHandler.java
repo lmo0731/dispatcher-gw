@@ -12,7 +12,7 @@ import lmo.gw.lib.Handler;
  */
 public abstract class PutHandler<T> extends Handler<T> {
 
-    public PutHandler(T target) {
+    public PutHandler(Class<T> target) {
         super(target);
     }
 }

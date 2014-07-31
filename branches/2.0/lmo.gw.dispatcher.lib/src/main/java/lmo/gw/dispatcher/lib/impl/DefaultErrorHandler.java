@@ -9,7 +9,6 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletResponse;
 import lmo.gw.dispatcher.lib.DispatcherException;
 import lmo.gw.dispatcher.lib.ErrorHandler;
-import lmo.gw.lib.Function;
 import org.apache.log4j.Logger;
 
 /**
@@ -23,7 +22,7 @@ public class DefaultErrorHandler extends ErrorHandler {
         String res = ex.getMessage();
         PrintWriter out = response.getWriter();
         try {
-            response.setContentType(Function.TEXT_PLAIN);
+            response.setContentType("text/plain");
             out.println(res);
         } finally {
             out.close();

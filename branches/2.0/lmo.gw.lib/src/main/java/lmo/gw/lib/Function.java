@@ -5,13 +5,8 @@
 package lmo.gw.lib;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 import javax.servlet.DispatcherType;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,65 +20,7 @@ import org.apache.log4j.Logger;
  *
  * @munkhochir<lmo0731@gmail.com>
  */
-public abstract class Function extends HttpServlet implements ConfigListener {
-
-    private Logger logger;
-    private String name = "Function";
-    private ConfigReloader mbean;
-
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public final void init(ServletConfig config) throws ServletException {
-        super.init(config); //To change body of generated methods, choose Tools | Templates.
-        String context = config.getServletContext().getContextPath().substring(1);
-        String servletName;
-        if (this.getClass().isAnnotationPresent(WebServlet.class)) {
-            WebServlet servlet = this.getClass().getAnnotation(WebServlet.class);
-            if (servlet.urlPatterns() == null || servlet.urlPatterns().length == 0) {
-                servletName = config.getServletName();
-            } else {
-                servletName = servlet.urlPatterns()[0];
-            }
-        } else {
-            servletName = config.getServletName();
-        }
-        String name = (context + "/" + servletName)
-                .replaceAll("^[/]+", "")
-                .replaceAll("[/]+$", "")
-                .replaceAll("[.]+$", "")
-                .replaceAll("^[.]+", "")
-                .replaceAll("[.]+", ".")
-                .replaceAll("[/]+", "/");
-        this.name = name;
-        this.logger = Logger.getLogger("FUNC." + name.toUpperCase());
-        mbean = new ConfigReloader(this);
-        try {
-            mbean.register();
-        } catch (Exception ex) {
-            this.logger.error("reloading config", ex);
-        }
-    }
-
-    public Function() {
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy(); //To change body of generated methods, choose Tools | Templates.
-        destroy(logger);
-        mbean.unregister();
-    }
-
-    public void init(Properties p) throws Exception {
-        this.init(logger, p);
-    }
-
-    protected abstract void init(Logger logger, Properties p) throws ServletException;
-
-    protected abstract void destroy(Logger logger);
+public abstract class Function extends HttpServlet {
 
     protected GetHandler get() {
         return null;
@@ -102,10 +39,12 @@ public abstract class Function extends HttpServlet implements ConfigListener {
     }
 
     protected final void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        if (ConfigReloader.isLoading) {
+        while (ConfigReloader.isLoading) {
             synchronized (ConfigReloader.lock) {
                 try {
-                    ConfigReloader.lock.wait();
+                    System.out.println("Config Loading.... WAITING");
+                    ConfigReloader.lock.wait(10);
+                    System.out.println("Config Loaded");
                 } catch (InterruptedException ex) {
                 }
             }
@@ -113,9 +52,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         String REQID = (String) req.getAttribute(Attribute.REQID);
         String funcname = (String) req.getAttribute(Attribute.FUNCNAME);
         Logger logger = Logger.getLogger(funcname + "." + REQID);
-        boolean xml = false;
         Handler handler = null;
-        Map<String, String> resHeaders = null;
         if (req.getMethod().equals("GET")) {
             handler = this.get();
         } else if (req.getMethod().equals("POST")) {
@@ -127,44 +64,51 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         }
         boolean begin = false;
         try {
+            resp.setCharacterEncoding("UTF-8");
             if (req.getDispatcherType() != DispatcherType.FORWARD && req.getDispatcherType() != DispatcherType.INCLUDE) {
                 throw new FunctionException(HttpServletResponse.SC_FORBIDDEN, "Not gateway request.");
             }
-            resp.setCharacterEncoding(req.getCharacterEncoding());
             logger.info("request method: " + req.getMethod());
             logger.info("request query: " + req.getQueryString());
             if (handler == null) {
                 throw new FunctionException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Method not allowed.");
             }
-            ContentBinder binder = null;
-            for (Object k : handler.binders.keySet()) {
-                if (k instanceof String) {
-                    if (req.getContentType().toLowerCase().startsWith(((String) k).toLowerCase())) {
-                        binder = (ContentBinder) handler.binders.get(k);
-                        break;
-                    }
-                }
+            String contentType = null;
+            if (req.getContentType() != null) {
+                contentType = req.getContentType().split("[;]")[0];
+                logger.info("content type: " + contentType);
             }
-            if (binder == null) {
+            ContentBinder binder = (ContentBinder) handler.binders.get(contentType);
+            logger.info("binder: " + binder);
+            if ((req.getMethod().equals("POST") || req.getMethod().equals("PUT")) && binder == null) {
                 String accept = handler.binders.keySet().toString();
                 resp.setHeader("Accept", accept.substring(1, accept.length() - 1));
-                throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+                throw new FunctionException(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, contentType + " is not supported");
             }
             Object reqObj = null;
-            try {
-                reqObj = binder.deserialize(req.getInputStream(), handler.target);
-            } catch (ContentBindException ex) {
-                throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage(), ex);
+            if (binder != null) {
+                try {
+                    reqObj = binder.deserialize(req.getInputStream(), handler.target);
+                } catch (ContentBindException ex) {
+                    logger.warn("Deserializing object", ex);
+                    throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage(), ex);
+                }
             }
             FunctionRequest funcReq = handler.getRequest(logger, funcname, reqObj, req);
             FunctionResponse funcRes = new FunctionResponse(resp);
             handler.handle(funcReq, funcRes);
             resp.setStatus(funcRes.getCode());
-            Object resObj = funcRes.getResponseObject();
-            try {
-                binder.serialize(resObj, resp.getOutputStream());
-            } catch (ContentBindException ex) {
-                throw new FunctionException(HttpServletResponse.SC_NO_CONTENT);
+            if (binder != null) {
+                resp.setContentType(binder.getContentType());
+                Object resObj = funcRes.getResponseObject();
+                try {
+                    binder.serialize(resObj, resp.getOutputStream());
+                } catch (ContentBindException ex) {
+                    logger.warn("Serializing object", ex);
+                    throw new FunctionException(HttpServletResponse.SC_NO_CONTENT, "");
+                }
+            } else {
+                throw new FunctionException(HttpServletResponse.SC_NO_CONTENT, "");
             }
         } catch (FunctionException ex) {
             resp.setContentType("text/plain");
@@ -181,9 +125,15 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         } finally {
             try {
                 resp.getWriter().flush();
+            } catch (Exception ex) {
+            }
+            try {
                 resp.getWriter().close();
             } catch (Exception ex) {
             }
+            logger.info("Headers: " + resp.getHeaderNames());
+            logger.info("Charset: " + resp.getCharacterEncoding());
+            logger.info("Content-Type: " + resp.getContentType());
             logger.info("DONE: " + resp.getStatus());
         }
     }
