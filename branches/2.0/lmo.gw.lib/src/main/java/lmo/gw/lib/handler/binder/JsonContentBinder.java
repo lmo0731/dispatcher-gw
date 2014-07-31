@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import lmo.gw.lib.ContentBindException;
 import lmo.gw.lib.ContentBinder;
 import lmo.utils.bson.BSONDeserializer;
 import lmo.utils.bson.BSONSerializer;
@@ -24,7 +23,7 @@ public class JsonContentBinder<T> extends ContentBinder<T> {
     BSONSerializer serializer = new BSONSerializer();
 
     @Override
-    protected T deserialize(InputStream in, Class<T> t) throws ContentBindException, Exception {
+    protected T deserialize(InputStream in, Class<T> t) throws Exception {
         if (t == null) {
             return null;
         }
@@ -34,7 +33,7 @@ public class JsonContentBinder<T> extends ContentBinder<T> {
     }
 
     @Override
-    protected void serialize(Object o, OutputStream out) throws ContentBindException {
+    protected void serialize(Object o, OutputStream out) throws Exception {
         String bson = serializer.deepSerialize(o);
         PrintWriter p = new PrintWriter(out);
         p.append(bson);
