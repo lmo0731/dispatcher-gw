@@ -4,6 +4,7 @@
  */
 package lmo.gw.lib;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -89,7 +90,7 @@ public abstract class Function extends HttpServlet {
             if (binder != null) {
                 try {
                     reqObj = binder.deserialize(req.getInputStream(), handler.target);
-                } catch (ContentBindException ex) {
+                } catch (Exception ex) {
                     logger.warn("Deserializing object", ex);
                     throw new FunctionException(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage(), ex);
                 }
@@ -102,8 +103,10 @@ public abstract class Function extends HttpServlet {
                 resp.setContentType(binder.getContentType());
                 Object resObj = funcRes.getResponseObject();
                 try {
-                    binder.serialize(resObj, resp.getOutputStream());
-                } catch (ContentBindException ex) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    binder.serialize(resObj, baos);
+                    baos.writeTo(resp.getOutputStream());
+                } catch (Exception ex) {
                     logger.warn("Serializing object", ex);
                     throw new FunctionException(HttpServletResponse.SC_NO_CONTENT, "");
                 }
@@ -113,7 +116,7 @@ public abstract class Function extends HttpServlet {
         } catch (FunctionException ex) {
             resp.setContentType("text/plain");
             if (ex.getCause() != null) {
-                logger.debug("Function error cause", ex);
+                logger.debug("Function error cause", ex.getCause());
             }
             resp.setStatus(ex.getCode());
             resp.getWriter().append(ex.getMessage());

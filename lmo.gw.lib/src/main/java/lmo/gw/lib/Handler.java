@@ -7,6 +7,7 @@ package lmo.gw.lib;
 import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import lmo.gw.lib.handler.binder.JsonContentBinder;
+import lmo.gw.lib.handler.binder.XmlContentBinder;
 import org.apache.log4j.Logger;
 
 /**
@@ -22,6 +23,7 @@ public abstract class Handler<T> {
         this.target = target;
         this.binders.put(null, new JsonContentBinder<T>());
         this.binders.put("application/json", new JsonContentBinder<T>());
+        this.binders.put("application/xml", new XmlContentBinder<T>());
     }
 
     final FunctionRequest<T> getRequest(Logger logger, String functionName, T target, HttpServletRequest req) {
