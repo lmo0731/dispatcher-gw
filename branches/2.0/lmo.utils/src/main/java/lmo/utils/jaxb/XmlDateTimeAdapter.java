@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  *
- * @munkhochir<lmo0731@gmail.com> <munkhochir@munkhochir.mn>
+ * @munkhochir<lmo0731@gmail.com> 
  */
 public class XmlDateTimeAdapter extends XmlAdapter<String, Date> {
 
