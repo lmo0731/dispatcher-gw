@@ -35,7 +35,7 @@ public class ConfigReloader implements ConfigReloaderMBean {
         this.listener = listener;
         this.configFile = configFile;
         this.name = configFile + "." + this.listener.getName() + ":type=Config,mbean=ConfigReloader";
-        this.logger = Logger.getLogger(name + ".CONFIG");
+        this.logger = Logger.getLogger(this.listener.getName() + ".CONFIG");
     }
 
     public void unregister() {
@@ -53,17 +53,19 @@ public class ConfigReloader implements ConfigReloaderMBean {
         synchronized (lock) {
             isLoading = true;
             try {
-                System.setProperty(configFile, listener.getName());
                 BasicConfigurator.configure();
-                try {
-                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + configFile + ".properties"));
-                } catch (IOException ex) {
-                    logger.warn(ex.getMessage());
-                }
                 try {
                     p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + listener.getName() + ".properties"));
                 } catch (IOException ex) {
                     logger.warn(ex.getMessage());
+                }
+                if (configFile != null) {
+                    try {
+                        p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + configFile + ".properties"));
+                    } catch (IOException ex) {
+                        logger.warn(ex.getMessage());
+                    }
+                    System.setProperty(configFile, listener.getName());
                 }
                 PropertyConfigurator.configure(p);
                 ret = listener.init(p);
