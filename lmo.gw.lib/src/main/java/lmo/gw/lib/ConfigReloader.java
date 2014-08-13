@@ -22,13 +22,19 @@ public class ConfigReloader implements ConfigReloaderMBean {
 
     ConfigListener listener;
     String name;
+    String configFile;
     public static boolean isLoading = false;
     public static final Object lock = new Object();
     Logger logger;
 
     public ConfigReloader(ConfigListener listener) {
+        this(listener, "mn.moogol.func");
+    }
+
+    public ConfigReloader(ConfigListener listener, String configFile) {
         this.listener = listener;
-        this.name = "lmo.gw.function." + this.listener.getName() + ":type=Config,mbean=ConfigReloader";
+        this.configFile = configFile;
+        this.name = configFile + "." + this.listener.getName() + ":type=Config,mbean=ConfigReloader";
         this.logger = Logger.getLogger(name + ".CONFIG");
     }
 
@@ -47,10 +53,10 @@ public class ConfigReloader implements ConfigReloaderMBean {
         synchronized (lock) {
             isLoading = true;
             try {
-                System.setProperty("lmo.gw.function", listener.getName());
+                System.setProperty(configFile, listener.getName());
                 BasicConfigurator.configure();
                 try {
-                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/lmo.func.properties"));
+                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + configFile + ".properties"));
                 } catch (IOException ex) {
                     logger.warn(ex.getMessage());
                 }

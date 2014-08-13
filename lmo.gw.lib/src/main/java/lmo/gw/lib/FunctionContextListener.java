@@ -6,6 +6,7 @@ package lmo.gw.lib;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
@@ -34,7 +35,14 @@ public abstract class FunctionContextListener implements ServletContextListener,
         BasicConfigurator.configure();
         logger = Logger.getLogger(name + ".CONTEXT");
         logger.info("CONTEXT INIT");
-        mbean = new ConfigReloader(this);
+        String config = "lmo.gw.function";
+        if (this.getClass().isAnnotationPresent(WebListener.class)) {
+            WebListener webListener = this.getClass().getAnnotation(WebListener.class);
+            if (!webListener.value().equals("")) {
+                config = webListener.value();
+            }
+        }
+        mbean = new ConfigReloader(this, config);
         try {
             mbean.register();
         } catch (Exception ex) {

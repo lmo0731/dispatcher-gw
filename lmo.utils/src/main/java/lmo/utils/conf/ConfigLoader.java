@@ -16,18 +16,19 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * @munkhochir<lmo0731@gmail.com> <munkhochir@munkhochir.mn>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class ConfigLoader {
 
     public static Logger logger = Logger.getLogger(ConfigLoader.class);
 
-    public static int load(Object o, String p, String prefix) throws FileNotFoundException, IOException {
+    public static Properties load(Object o, String p, String prefix) throws FileNotFoundException, IOException {
         Properties prop = new Properties();
         InputStream in = new FileInputStream(p);
         try {
             prop.load(in);
-            return ConfigLoader.load(o, prop, prefix);
+            ConfigLoader.load(o, prop, prefix);
+            return prop;
         } finally {
             try {
                 in.close();
@@ -40,7 +41,7 @@ public class ConfigLoader {
         return load(o, p, null);
     }
 
-    public static int load(Object o, String p) throws FileNotFoundException, IOException {
+    public static Properties load(Object o, String p) throws FileNotFoundException, IOException {
         return load(o, p, null);
     }
 
