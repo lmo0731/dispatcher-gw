@@ -65,8 +65,8 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 } catch (Exception ex) {
                     logger.warn("", ex);
                 }
-                System.setProperty("lmo.gw.function", listener.getName());
                 BasicConfigurator.configure();
+                System.setProperty("lmo.gw.function", listener.getName());
                 try {
                     p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/lmo.func.properties"));
                 } catch (IOException ex) {
