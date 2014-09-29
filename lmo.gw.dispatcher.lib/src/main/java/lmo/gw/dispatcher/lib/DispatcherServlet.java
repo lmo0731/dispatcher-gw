@@ -26,10 +26,10 @@ public class DispatcherServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (Config.isLoading) {
+        while (Config.isLoading) {
             synchronized (Config.lock) {
                 try {
-                    Config.lock.wait();
+                    Config.lock.wait(100);
                 } catch (InterruptedException ex) {
                 }
             }

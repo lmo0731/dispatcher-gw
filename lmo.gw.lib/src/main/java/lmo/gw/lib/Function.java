@@ -124,10 +124,10 @@ public abstract class Function extends HttpServlet implements ConfigListener {
     }
 
     protected final void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        if (ConfigReloader.isLoading) {
+        while (ConfigReloader.isLoading) {
             synchronized (ConfigReloader.lock) {
                 try {
-                    ConfigReloader.lock.wait();
+                    ConfigReloader.lock.wait(100);
                 } catch (InterruptedException ex) {
                 }
             }
