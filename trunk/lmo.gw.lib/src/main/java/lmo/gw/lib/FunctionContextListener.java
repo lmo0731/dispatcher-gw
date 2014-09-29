@@ -4,13 +4,10 @@
  */
 package lmo.gw.lib;
 
-import java.io.FileInputStream;
-import java.util.Properties;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 /**
  *
