@@ -66,7 +66,6 @@ public class ConfigReloader implements ConfigReloaderMBean {
                     logger.warn("", ex);
                 }
                 BasicConfigurator.configure();
-                System.setProperty("lmo.gw.function", listener.getName());
                 try {
                     p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/lmo.func.properties"));
                 } catch (IOException ex) {
@@ -77,6 +76,7 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 } catch (IOException ex) {
                     logger.warn(ex.getMessage());
                 }
+                System.setProperty("lmo.gw.function", listener.getName());
                 PropertyConfigurator.configure(p);
                 try {
                     listener.init(p);
