@@ -76,7 +76,12 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 } catch (IOException ex) {
                     logger.warn(ex.getMessage());
                 }
-                System.setProperty("lmo.gw.function", listener.getName());
+                //System.setProperty("lmo.gw.function", listener.getName());
+                for (String k : p.stringPropertyNames()) {
+                    String v = p.getProperty(k);
+                    v = v.replace("${lmo.gw.function}", listener.getName());
+                    p.setProperty(k, v);
+                }
                 PropertyConfigurator.configure(p);
                 try {
                     listener.init(p);
