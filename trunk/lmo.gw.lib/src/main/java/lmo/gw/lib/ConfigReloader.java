@@ -79,6 +79,7 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 //System.setProperty("lmo.gw.function", listener.getName());
                 for (String k : p.stringPropertyNames()) {
                     String v = p.getProperty(k);
+                    v = v.replace("${lmo.gw.appender}", listener.getName().replace('.', '-'));
                     v = v.replace("${lmo.gw.function}", listener.getName());
                     p.setProperty(k, v);
                 }
