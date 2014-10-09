@@ -52,7 +52,7 @@ public class ConfigLoader {
         } else {
             c = o.getClass();
         }
-        for (Field f : c.getFields()) {
+        for (Field f : c.getDeclaredFields()) {
             String key = (prefix == null ? "" : (prefix + ".")) + f.getName();
             boolean required = false;
             if (f.isAnnotationPresent(ConfigName.class)) {
@@ -126,16 +126,25 @@ public class ConfigLoader {
                 logger.warn("Unsupported array type: " + type.getComponentType() + "[]");
             }
         } else {
-            try {
-                Object o = type.newInstance();
-                int k = load(o, p, prefix);
-                if (k > 0) {
-                    return o;
+            boolean maybe = false;
+            for (String s : p.stringPropertyNames()) {
+                if (s.startsWith(prefix + ".") && s.length() > prefix.length() + 1) {
+                    maybe = true;
+                    break;
                 }
-            } catch (InstantiationException ex) {
-                logger.warn("Construct error: " + type);
-            } catch (IllegalAccessException ex) {
-                logger.warn("Access error: " + type);
+            }
+            if (maybe) {
+                try {
+                    Object o = type.newInstance();
+                    int k = load(o, p, prefix);
+                    if (k > 0) {
+                        return o;
+                    }
+                } catch (InstantiationException ex) {
+                    logger.warn("Construct error: " + type);
+                } catch (IllegalAccessException ex) {
+                    logger.warn("Access error: " + type);
+                }
             }
         }
         return v;
