@@ -65,7 +65,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         } else {
             servletName = config.getServletName();
         }
-        String name = (context+"/"+servletName)
+        String name = (context)
                 .replaceAll("^[/]+", "")
                 .replaceAll("[/]+$", "")
                 .replaceAll("[.]+$", "")
