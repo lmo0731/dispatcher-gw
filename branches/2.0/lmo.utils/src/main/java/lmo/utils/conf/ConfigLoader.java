@@ -80,7 +80,12 @@ public class ConfigLoader {
                 }
             } else {
                 try {
-                    Object v = parse(f.getType(), value, p, key);
+                    Object v = null;
+                    try {
+                        v = parse(f.getType(), value, p, key);
+                    } catch (Exception ex) {
+                        logger.warn(key + " parse error", ex);
+                    }
                     if (v != null) {
                         f.set(o, v);
                         logger.debug(o + "." + f.getName() + " = " + f.get(o));
