@@ -76,11 +76,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         this.logger = Logger.getLogger("FUNC." + name.toUpperCase());
         mbean = new ConfigReloader(this);
         mbean.register();
-        try {
-            this.logger.info(mbean.reload());
-        } catch (Exception ex) {
-            this.logger.error("reloading config", ex);
-        }
+        logger.info("FUNCTION INIT");
     }
 
     public Function() {
@@ -91,6 +87,7 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         super.destroy(); //To change body of generated methods, choose Tools | Templates.
         destroy(logger);
         mbean.unregister();
+        logger.info("FUNCTION DESTROY");
     }
 
     public void init(Properties p) throws Exception {
