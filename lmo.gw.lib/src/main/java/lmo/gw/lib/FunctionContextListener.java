@@ -33,23 +33,15 @@ public abstract class FunctionContextListener implements ServletContextListener,
         this.name = name;
         BasicConfigurator.configure();
         logger = Logger.getLogger("FUNC." + name + ".CONTEXT");
-        logger.info("CONTEXT INIT");
         mbean = new ConfigReloader(this);
         mbean.register();
-        try {
-            this.logger.info(mbean.reload());
-        } catch (Exception ex) {
-            this.logger.error("reloading config", ex);
-        }
+        logger.info("CONTEXT INIT");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        try {
-            this.destroy();
-            mbean.unregister();
-        } catch (Exception ex) {
-        }
+        mbean.unregister();
+        logger.info("CONTEXT DESTROYED");
     }
 
     public String getName() {
