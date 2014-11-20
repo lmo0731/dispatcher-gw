@@ -5,10 +5,10 @@
 package lmo.gw.lib;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import javax.management.MBeanServer;
@@ -37,6 +37,11 @@ public class ConfigReloader implements ConfigReloaderMBean {
 
     public String unregister() {
         try {
+            listener.destroy();
+        } catch (Exception ex) {
+            logger.warn("destroying", ex);
+        }
+        try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             ObjectName mbname = new ObjectName(name);
             mbs.unregisterMBean(mbname);
@@ -52,19 +57,11 @@ public class ConfigReloader implements ConfigReloaderMBean {
             mbs.registerMBean(this, mbname);
         } catch (Exception ex) {
         }
-        return "OK";
-    }
-
-    public String reload() throws Exception {
+        Object ret = null;
         Properties p = new Properties();
-        isLoading = true;
         synchronized (lock) {
+            isLoading = true;
             try {
-                try {
-                    listener.destroy();
-                } catch (Exception ex) {
-                    logger.warn("", ex);
-                }
                 BasicConfigurator.configure();
                 try {
                     p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/lmo.func.properties"));
@@ -76,7 +73,6 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 } catch (IOException ex) {
                     logger.warn(ex.getMessage());
                 }
-                //System.setProperty("lmo.gw.function", listener.getName());
                 for (String k : p.stringPropertyNames()) {
                     String v = p.getProperty(k);
                     v = v.replace("${lmo.gw.function}", listener.getName());
@@ -88,22 +84,24 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 } catch (Exception ex) {
                     logger.warn("", ex);
                 }
-            } catch (Exception ex) {
-                logger.warn("", ex);
             } finally {
-                lock.notify();
                 isLoading = false;
+                lock.notify();
             }
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(baos);
-
         p.list(writer);
-
         writer.flush();
+        try {
+            return baos.toString("UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            return baos.toString();
+        }
+    }
 
-        return baos.toString(
-                "UTF-8");
-
+    public String reload() throws Exception {
+        this.unregister();
+        return this.register();
     }
 }
