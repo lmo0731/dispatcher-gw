@@ -4,10 +4,12 @@
  */
 package lmo.utils.conf;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
@@ -26,7 +28,7 @@ public class ConfigLoader {
         Properties prop = new Properties();
         InputStream in = new FileInputStream(p);
         try {
-            prop.load(in);
+            prop.load(new BufferedReader(new InputStreamReader(in, "UTF-8")));
             return ConfigLoader.load(o, prop, prefix);
         } finally {
             try {
