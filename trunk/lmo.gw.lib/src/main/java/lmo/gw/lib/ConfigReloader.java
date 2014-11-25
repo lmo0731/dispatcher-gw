@@ -68,7 +68,9 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 String name1 = "lmo.func";
                 if (listener.getClass().isAnnotationPresent(WebListener.class)) {
                     WebListener cname = listener.getClass().getAnnotation(WebListener.class);
-                    name1 = cname.value();
+                    if (!cname.value().isEmpty()) {
+                        name1 = cname.value();
+                    }
                 }
                 try {
                     p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + name1 + ".properties"));
