@@ -13,6 +13,7 @@ import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import lmo.utils.conf.ConfigName;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -63,8 +64,13 @@ public class ConfigReloader implements ConfigReloaderMBean {
             isLoading = true;
             try {
                 BasicConfigurator.configure();
+                String name1 = "lmo.func";
+                if (listener.getClass().isAnnotationPresent(ConfigName.class)) {
+                    ConfigName cname = listener.getClass().getAnnotation(ConfigName.class);
+                    name1 = cname.value();
+                }
                 try {
-                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/lmo.func.properties"));
+                    p.load(new FileInputStream(System.getProperty("catalina.base") + "/conf/" + name1 + ".properties"));
                 } catch (IOException ex) {
                     logger.warn(ex.getMessage());
                 }
