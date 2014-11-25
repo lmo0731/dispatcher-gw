@@ -13,6 +13,7 @@ import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.servlet.annotation.WebListener;
 import lmo.utils.conf.ConfigName;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -65,8 +66,8 @@ public class ConfigReloader implements ConfigReloaderMBean {
             try {
                 BasicConfigurator.configure();
                 String name1 = "lmo.func";
-                if (listener.getClass().isAnnotationPresent(ConfigName.class)) {
-                    ConfigName cname = listener.getClass().getAnnotation(ConfigName.class);
+                if (listener.getClass().isAnnotationPresent(WebListener.class)) {
+                    WebListener cname = listener.getClass().getAnnotation(WebListener.class);
                     name1 = cname.value();
                 }
                 try {
