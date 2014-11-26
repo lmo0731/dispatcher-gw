@@ -89,7 +89,6 @@ public class HttpRequest implements Closeable {
         this.con.setInstanceFollowRedirects(false);
         this.con.setRequestMethod(method);
         this.con.setUseCaches(false);
-        this.con.setRequestProperty("Content-Type", "text/plain;charset=UTF-8");
     }
 
     public void setSSLSocketFactory(SSLSocketFactory sslsf) {
