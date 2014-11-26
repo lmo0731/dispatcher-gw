@@ -84,7 +84,6 @@ public abstract class Function extends HttpServlet implements ConfigListener {
 
     @Override
     public void destroy() {
-        super.destroy(); //To change body of generated methods, choose Tools | Templates.
         mbean.unregister();
         logger.info("FUNCTION DESTROY");
     }
