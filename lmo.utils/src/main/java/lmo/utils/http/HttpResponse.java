@@ -4,14 +4,17 @@
  */
 package lmo.utils.http;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lmo.utils.Pair;
 
 /**
  *
- * @ munkhochir<lmo0731@gmail.com>
+ * @munkhochir<lmo0731@gmail.com>
  */
 public class HttpResponse {
 
@@ -48,8 +51,9 @@ public class HttpResponse {
             return super.remove(key); //To change body of generated methods, choose Tools | Templates.
         }
     };
-    byte[] body;
+    InputStream in;
     int status;
+    HttpListener listener;
 
     HttpResponse() {
     }
@@ -86,6 +90,29 @@ public class HttpResponse {
     }
 
     public byte[] getBody() {
-        return body;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            this.writeTo(baos);
+        } catch (Exception ex) {
+        }
+        return baos.toByteArray();
     }
+
+    public void writeTo(OutputStream out) throws IOException {
+        try {
+            while (true) {
+                int b = in.read();
+                if (b == -1) {
+                    break;
+                }
+                out.write(b);
+                if (listener != null) {
+                    listener.onRead(b);
+                }
+            }
+        } finally {
+            listener.onClose();
+        }
+    }
+
 }
