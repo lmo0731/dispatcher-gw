@@ -88,8 +88,12 @@ public abstract class Function extends HttpServlet implements ConfigListener {
         logger.info("FUNCTION DESTROY");
     }
 
-    public void init(Properties p) throws Exception {
+    public void initConfig(Properties p) throws Exception {
         this.init(logger, p);
+    }
+
+    public void destroyConfig() throws Exception {
+        this.destroy(logger);
     }
 
     protected void begin(Map<String, Object> params, HttpServletRequest request, String raw, Logger logger) {
