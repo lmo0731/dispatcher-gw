@@ -19,6 +19,8 @@ import java.util.Map;
  */
 public class BSONDateFactory extends AbstractTransformer implements ObjectFactory {
 
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Override
     public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         if (targetType == null) {
@@ -34,7 +36,7 @@ public class BSONDateFactory extends AbstractTransformer implements ObjectFactor
     }
 
     Object getDate(Object value) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         if (value instanceof Map) {
             Map map = (Map) value;
             if (map.containsKey("$date") && map.size() == 1) {
@@ -59,7 +61,7 @@ public class BSONDateFactory extends AbstractTransformer implements ObjectFactor
     public void transform(Object object) {
         this.getContext().writeOpenObject();
         this.getContext().writeName("$date");
-        this.getContext().write("" + ((Date) object).getTime());
+        this.getContext().writeQuoted(sdf.format((Date) object));
         this.getContext().writeCloseObject();
     }
 }
