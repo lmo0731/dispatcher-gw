@@ -20,14 +20,19 @@ public class BSONNullTransformer extends AbstractTransformer {
 
     @Override
     public void transform(Object object) {
-        Object a = getContext().getObjectStack().get(1);
+        Object a = null;
+        try {
+            a = getContext().getObjectStack().get(1);
+        } catch (Exception ex) {
+            getContext().write("null");
+        }
         if (a == null) {
         } else if (a instanceof Iterable) {
-            getContext().write(null);
+            getContext().write("null");
         } else if (a instanceof Iterator) {
-            getContext().write(null);
+            getContext().write("null");
         } else if (a.getClass().isArray()) {
-            getContext().write(null);
+            getContext().write("null");
         }
     }
 }
