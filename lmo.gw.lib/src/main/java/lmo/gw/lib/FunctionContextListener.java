@@ -4,6 +4,7 @@
  */
 package lmo.gw.lib;
 
+import java.util.Properties;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.log4j.BasicConfigurator;
@@ -47,4 +48,16 @@ public abstract class FunctionContextListener implements ServletContextListener,
     public String getName() {
         return name;
     }
+
+    public void initConfig(Properties p) throws Exception {
+        init(p);
+    }
+
+    public void destroyConfig() throws Exception {
+        destroy();
+    }
+
+    public abstract void init(Properties p) throws Exception;
+
+    public abstract void destroy() throws Exception;
 }
