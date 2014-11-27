@@ -14,7 +14,6 @@ import java.util.Properties;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.servlet.annotation.WebListener;
-import lmo.utils.conf.ConfigName;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -39,7 +38,7 @@ public class ConfigReloader implements ConfigReloaderMBean {
 
     public String unregister() {
         try {
-            listener.destroy();
+            listener.destroyConfig();
         } catch (Exception ex) {
             logger.warn("destroying", ex);
         }
@@ -89,7 +88,7 @@ public class ConfigReloader implements ConfigReloaderMBean {
                 }
                 PropertyConfigurator.configure(p);
                 try {
-                    listener.init(p);
+                    listener.initConfig(p);
                 } catch (Exception ex) {
                     logger.warn("", ex);
                 }
