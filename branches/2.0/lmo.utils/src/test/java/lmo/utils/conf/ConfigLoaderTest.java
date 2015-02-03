@@ -29,7 +29,8 @@ public class ConfigLoaderTest extends TestCase {
         Object o = null;
         Properties p = new Properties();
         p.setProperty("pref.a.b.c", "abcTest");
-        p.setProperty("pref.x.y.sz", "test");
+        p.setProperty("pref.x.y.z.k", "test");
+        p.setProperty("pref.cons.b", "test");
         String prefix = "pref";
         Config c = new Config();
         ConfigLoader.load(c, p, prefix);
@@ -44,10 +45,21 @@ public class ConfigLoaderTest extends TestCase {
         public static String def;
         @ConfigName(value = "x.y", required = true)
         public static SubObject subObject;
+        @ConfigName(value = "cons")
+        public ConsObject cons;
     }
 
     public static class SubObject {
+
         @ConfigName(required = true)
         public static String z;
+    }
+
+    public static class ConsObject {
+
+        public String b;
+
+        public ConsObject() {
+        }
     }
 }

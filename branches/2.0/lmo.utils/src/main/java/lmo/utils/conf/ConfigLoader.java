@@ -4,13 +4,19 @@
  */
 package lmo.utils.conf;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
@@ -26,7 +32,7 @@ public class ConfigLoader {
         Properties prop = new Properties();
         InputStream in = new FileInputStream(p);
         try {
-            prop.load(in);
+            prop.load(new BufferedReader(new InputStreamReader(in, "UTF-8")));
             ConfigLoader.load(o, prop, prefix);
             return prop;
         } finally {
@@ -53,7 +59,7 @@ public class ConfigLoader {
         } else {
             c = o.getClass();
         }
-        for (Field f : c.getFields()) {
+        for (Field f : c.getDeclaredFields()) {
             String key = (prefix == null ? "" : (prefix + ".")) + f.getName();
             boolean required = false;
             if (f.isAnnotationPresent(ConfigName.class)) {
@@ -66,43 +72,62 @@ public class ConfigLoader {
             String value = p.getProperty(key);
             if (value != null) {
                 try {
-                    Object v = parse(f.getType(), value, p, key);
+                    Type[] cs = new Type[]{};
+                    try {
+                        if (f.getGenericType() instanceof ParameterizedType) {
+                            ParameterizedType pType = (ParameterizedType) f.getGenericType();
+                            cs = pType.getActualTypeArguments();
+                            //logger.debug(o + "." + f.getName() + " generic type: " + Arrays.toString(cs));
+                        }
+                    } catch (Exception ex) {
+                        logger.error(key + "", ex);
+                    }
+                    Object v = parse(f.getType(), value, p, key, cs);
                     if (v != null) {
                         f.set(o, v);
-                        logger.debug(o + "." + f.getName() + " = " + f.get(o));
+                        logger.debug(key + " = " + f.get(o));
                         ret++;
-                    } else if (required) {
-                        logger.warn(o + "." + f.getName() + " is required");
                     }
                 } catch (Exception ex) {
-                    logger.info("", ex);
+                    logger.error("", ex);
                     continue;
                 }
             } else {
-                try {
-                    Object v = null;
+                boolean maybe = false;
+                for (String s : p.stringPropertyNames()) {
+                    if (s.startsWith(key + ".") && s.length() > key.length() + 1) {
+                        maybe = true;
+                        break;
+                    }
+                }
+                if (maybe) {
                     try {
-                        v = parse(f.getType(), value, p, key);
-                    } catch (Exception ex) {
-                        logger.warn(key + " parse error", ex);
+                        Object o1 = f.getType().newInstance();
+                        int k = load(o1, p, key);
+                        if (k > 0) {
+                            f.set(o, o1);
+                            logger.debug(key + " = " + f.get(o));
+                        }
+                    } catch (InstantiationException ex) {
+                        logger.warn("Construct error: " + f.getType());
+                    } catch (IllegalAccessException ex) {
+                        logger.warn("Access error: " + f.getType());
                     }
-                    if (v != null) {
-                        f.set(o, v);
-                        logger.debug(o + "." + f.getName() + " = " + f.get(o));
-                        ret++;
-                    } else if (required) {
-                        logger.warn(key + " is missing");
+                } else if (required) {
+                    try {
+                        if (f.get(o) == null) {
+                            logger.warn(key + " is required");
+                        }
+                    } catch (IllegalArgumentException ex) {
+                    } catch (IllegalAccessException ex) {
                     }
-                } catch (Exception ex) {
-                    logger.info("", ex);
-                    continue;
                 }
             }
         }
         return ret;
     }
 
-    public static Object parse(Class type, String value, Properties p, String prefix) {
+    public static Object parse(Class type, String value, Properties p, String prefix, Type... genericTypes) {
         Object v = null;
         if (type == Integer.class || type == Integer.TYPE) {
             v = Integer.parseInt(value);
@@ -131,18 +156,21 @@ public class ConfigLoader {
             } else {
                 logger.warn("Unsupported array type: " + type.getComponentType() + "[]");
             }
-        } else {
+        } else if (List.class.isAssignableFrom(type)) {
+            String[] splitted = split(value, ",");
+            List o;
             try {
-                Object o = type.newInstance();
-                int k = load(o, p, prefix);
-                if (k > 0) {
-                    return o;
-                }
-            } catch (InstantiationException ex) {
-                logger.warn("Construct error: " + type);
-            } catch (IllegalAccessException ex) {
-                logger.warn("Access error: " + type);
+                o = (List) type.newInstance();
+            } catch (Exception ex) {
+                o = new ArrayList<Object>();
             }
+            for (int i = 0; i < splitted.length; i++) {
+                Object e = (parse((Class) genericTypes[0], splitted[i].trim(), p, prefix));
+                o.add(e);
+            }
+            v = o;
+        } else {
+            logger.warn("Unsupported type: " + type);
         }
         return v;
     }
@@ -176,5 +204,11 @@ public class ConfigLoader {
             list.add(sb.toString());
         }
         return list.toArray(new String[]{});
+    }
+
+    public static void main(String args[]) {
+        System.out.println(List.class.isAssignableFrom(ArrayList.class));
+        System.out.println(ArrayList.class.isAssignableFrom(List.class));
+        System.out.println(ArrayList.class.asSubclass(List.class));
     }
 }
