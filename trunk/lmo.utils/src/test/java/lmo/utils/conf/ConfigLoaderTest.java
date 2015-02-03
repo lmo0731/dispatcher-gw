@@ -29,7 +29,7 @@ public class ConfigLoaderTest extends TestCase {
         Object o = null;
         Properties p = new Properties();
         p.setProperty("pref.a.b.c", "abcTest");
-        p.setProperty("pref.x.y.z", "test");
+        p.setProperty("pref.x.y.z.k", "test");
         p.setProperty("pref.cons.b", "test");
         String prefix = "pref";
         Config c = new Config();
