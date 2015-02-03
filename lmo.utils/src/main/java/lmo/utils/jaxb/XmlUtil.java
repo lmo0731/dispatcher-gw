@@ -37,14 +37,14 @@ final public class XmlUtil {
         return response;
     }
 
-    public static Object unmarshal(String xmlString, Class... c) throws JAXBException {
-        Object object = null;
+    public static <T> T unmarshal(String xmlString, Class<? extends T>... c) throws JAXBException {
+        T object = null;
         try {
             byte[] bytes = xmlString.getBytes("UTF-8");
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             JAXBContext context = JAXBContext.newInstance(c);
             Unmarshaller um = context.createUnmarshaller();
-            object = (Object) um.unmarshal(bais);
+            object = (T) um.unmarshal(bais);
             XmlValidator.validateRequired(object, object.getClass());
         } catch (UnsupportedEncodingException ex) {
             throw new JAXBException(ex);
